@@ -2,8 +2,11 @@
 
 # IntelliJ
 /out/
-.idea/
-*.iml
+/*.iml
+
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
 
 # OS Files
 *.DS_Store
