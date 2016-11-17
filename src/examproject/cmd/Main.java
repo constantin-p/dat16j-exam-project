@@ -1,6 +1,9 @@
 package examproject.cmd;
 
+import examproject.core.Discount;
 import examproject.core.ManagementSystem;
+import examproject.core.Member;
+import examproject.core.SeniorDiscount;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,7 +108,7 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // Show members option
-                System.out.println("\nNot yet implemented!");
+                showMemberList();
                 break;
             case 1:
                 // Back to main menu option
@@ -127,5 +130,44 @@ public class Main {
 
         System.out.println(" Member added!");
         showChairmanMenu();
+    }
+
+    private static void showMemberList() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName);
+        }
+        int selectedMember = screenManager.setOptionsView(" - Member list - ", options);
+        System.out.println(selectedMember);
+        showMemberActions(members.get(selectedMember));
+    }
+
+    private static void showMemberActions(Member member) {
+        ArrayList<String> memberActionsMenu = new ArrayList<String>();
+        memberActionsMenu.add("Apply discount");
+
+        memberActionsMenu.add("Members list (back to members list");
+
+        int selectedOption = screenManager.setOptionsView(" - <" + member.firstName + " " + member.lastName + "> actions menu - ", memberActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // Show discount option
+                showDiscountList(member);
+                break;
+            case 1:
+                // Back to member list option
+                showMemberList();
+                break;
+        }
+    }
+
+    private static void showDiscountList(Member member) {
+        SeniorDiscount discount = app.getDiscounts();
+        ArrayList<String> options = new ArrayList<String>();
+        options.add(discount.getType() + " modifier " + discount.getModifier());
+        int selectedDiscount = screenManager.setOptionsView(" - Discount list - ", options);
+        System.out.println(selectedDiscount);
     }
 }

@@ -1,5 +1,6 @@
 package examproject.core;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class ManagementSystem {
@@ -7,9 +8,12 @@ public class ManagementSystem {
     private PlaceholderFunctionalityProvider placeholderFunctionalityProvider;
     private Chairman currentChairman;
     private Treasurer currentTreasurer;
+    private ArrayList<? extends Discount> discounts = new ArrayList<>();
+    private SeniorDiscount tmpDiscount;
 
     public ManagementSystem() {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
+        this.tmpDiscount = new SeniorDiscount(0.25);
     }
 
     // TODO: use response codes instead of boolean
@@ -67,5 +71,13 @@ public class ManagementSystem {
         // ?id
 
         return new Member("test", "test", new Date(), "test");
+    }
+
+    public ArrayList<Member> getMembers() {
+        return this.placeholderFunctionalityProvider.getMemberList();
+    }
+
+    public SeniorDiscount getDiscounts() {
+        return this.tmpDiscount;
     }
 }
