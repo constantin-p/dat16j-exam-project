@@ -33,24 +33,31 @@ public class ManagementSystem {
         Member functionality
      */
     // TODO: use response codes instead of boolean
-    protected boolean addMember(String firstName, String lastName, Date dateOfBirth) {
+    public boolean addMember(String firstName, String lastName, Date dateOfBirth,String cprNumber) {
         // 1. check for duplicate   placeholder functionality -> getMember(...data);
         // 2. if unique, add the new member, error otherwise
+         boolean hasMember = this.placeholderFunctionalityProvider.getMember(cprNumber);
+        if(hasMember) {
+            return false;
+        }
+        this.placeholderFunctionalityProvider.setMember(new Member(firstName, lastName, dateOfBirth, cprNumber));
+        return true;
 
-        return false;
+
     }
+
 
     protected Member getMember(String id) {
         // placeholder functionality -> getMember(...id);
         // ?id
 
-        return new Member();
+        return new Member("test", "test", new Date(), "test");
     }
 
     protected Member updateMember(String username, String password) {
         // placeholder functionality -> getMember(...id);
         // ?id
 
-        return new Member();
+        return new Member("test", "test", new Date(), "test");
     }
 }
