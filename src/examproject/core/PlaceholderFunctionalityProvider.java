@@ -19,6 +19,15 @@ public class PlaceholderFunctionalityProvider {
             throw new IllegalArgumentException("No chairman with the given username & password!");
         }
     }
+
+    public static Treasurer getTreasurer(String username, String password) {
+        if (Objects.equals(username, "treasurer") && Objects.equals(password, "treasurer")) {
+            return new Treasurer(username, password);
+        } else {
+            throw new IllegalArgumentException("No treasurer with the given username & password!");
+        }
+    }
+
     public void setMember(Member member){
         this.currentMember = member;
 
