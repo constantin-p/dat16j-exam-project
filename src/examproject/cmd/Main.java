@@ -1,10 +1,13 @@
 package examproject.cmd;
 
+import examproject.core.ManagementSystem;
+
 import java.util.ArrayList;
 
 public class Main {
 
     private static ScreenManager screenManager = new ScreenManager();
+    private static ManagementSystem app = new ManagementSystem();
 
     public static void main(String[] args) {
         showMainMenu();
@@ -17,7 +20,7 @@ public class Main {
 
         mainMenu.add("Exit.");
 
-        int selectedOption = screenManager.getOptionsView(" - Main menu - ", mainMenu);
+        int selectedOption = screenManager.setOptionsView(" - Main menu - ", mainMenu);
         switch (selectedOption) {
             case 0:
                 // Chairman login option
@@ -37,12 +40,18 @@ public class Main {
      *  Chairman views
      */
     private static void showChairmanLogin() {
-        String username = screenManager.getStringInputView(" - [Chairman] username: - ", 4, 10);
-        String password = screenManager.getStringInputView(" - [Chairman] password: - ", 4, 10);
+        while (true) {
+            String username = screenManager.setStringInputView(" - [Chairman] username: - ", 4, 10);
+            String password = screenManager.setStringInputView(" - [Chairman] password: - ", 4, 10);
 
-        // TODO: Validation
-
-        showChairmanMenu();
+            boolean okStatus = app.chairmanSignIn(username, password);
+            if (okStatus) {
+                showChairmanMenu();
+                return;
+            } else {
+                screenManager.setInfoView("Log in error!");
+            }
+        }
     }
 
     private static void showChairmanMenu() {
@@ -51,7 +60,7 @@ public class Main {
 
         chairmanMenu.add("Log out (back to main menu).");
 
-        int selectedOption = screenManager.getOptionsView(" - Chairman menu - ", chairmanMenu);
+        int selectedOption = screenManager.setOptionsView(" - Chairman menu - ", chairmanMenu);
         switch (selectedOption) {
             case 0:
                 // Add new member option
@@ -68,8 +77,8 @@ public class Main {
      *  Treasurer views
      */
     private static void showTreasurerLogin() {
-        String username = screenManager.getStringInputView(" - [Treasurer] username: - ", 4, 10);
-        String password = screenManager.getStringInputView(" - [Treasurer] password: - ", 4, 10);
+        String username = screenManager.setStringInputView(" - [Treasurer] username: - ", 4, 10);
+        String password = screenManager.setStringInputView(" - [Treasurer] password: - ", 4, 10);
 
         // TODO: Validation
 
@@ -83,7 +92,7 @@ public class Main {
 
         treasurerMenu.add("Log out (back to main menu).");
 
-        int selectedOption = screenManager.getOptionsView(" - Treasurer menu - ", treasurerMenu);
+        int selectedOption = screenManager.setOptionsView(" - Treasurer menu - ", treasurerMenu);
         switch (selectedOption) {
             case 0:
                 // Show members option
