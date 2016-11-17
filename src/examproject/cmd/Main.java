@@ -79,12 +79,19 @@ public class Main {
      *  Treasurer views
      */
     private static void showTreasurerLogin() {
-        String username = screenManager.setStringInputView(" - [Treasurer] username: - ", 4, 10);
-        String password = screenManager.setStringInputView(" - [Treasurer] password: - ", 4, 10);
+        while (true) {
+            String username = screenManager.setStringInputView(" - [Treasurer] username: - ", 4, 10);
+            String password = screenManager.setStringInputView(" - [Treasurer] password: - ", 4, 10);
 
-        // TODO: Validation
+            boolean okStatus = app.treasurerSignIn(username, password);
+            if (okStatus) {
+                showTreasurerMenu();
+                return;
+            } else {
+                screenManager.setInfoView("Log in error");
+            }
 
-        showTreasurerMenu();
+        }
     }
 
 
