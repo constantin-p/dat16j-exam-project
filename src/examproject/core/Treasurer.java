@@ -6,11 +6,11 @@ public class Treasurer {
     private String password;
 
     public Treasurer(String username, String password) {
-            this.username = username;
-            this.password = password;
+        this.username = username;
+        this.password = password;
     }
 
-    public String getUsename() {
+    public String getUsername() {
         return username;
     }
 
