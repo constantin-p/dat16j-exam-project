@@ -7,6 +7,7 @@ import examproject.core.SeniorDiscount;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Main {
 
@@ -126,31 +127,36 @@ public class Main {
         String lastName = screenManager.setStringInputView(" - [Chairman] Member last name: - ", 4, 10);
         String cprNumber = screenManager.setStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
 
+        // TODO: return validation, member already registered error messages
         app.addMember(firstName, lastName, new Date(), cprNumber);
 
-        System.out.println(" Member added!");
+        screenManager.setInfoView("Member added");
         showChairmanMenu();
     }
 
     private static void showMemberList() {
         ArrayList<Member> members = app.getMembers();
         ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            options.add(currentMember.firstName + " " + currentMember.lastName);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
         }
-        int selectedMember = screenManager.setOptionsView(" - Member list - ", options);
-        System.out.println(selectedMember);
-        showMemberActions(members.get(selectedMember));
+
+        int selectedMemberIndex = screenManager.setOptionsView(" - Member list - ", options);
+        showMemberActions(members.get(selectedMemberIndex));
     }
 
     private static void showMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
-        memberActionsMenu.add("Apply discount");
+        memberActionsMenu.add("Apply discount.");
 
-        memberActionsMenu.add("Members list (back to members list");
+        memberActionsMenu.add("Members list (back to member list).");
 
-        int selectedOption = screenManager.setOptionsView(" - <" + member.firstName + " " + member.lastName + "> actions menu - ", memberActionsMenu);
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
+        int selectedOption = screenManager.setOptionsView(viewLabel, memberActionsMenu);
         switch (selectedOption) {
             case 0:
                 // Show discount option
@@ -163,11 +169,23 @@ public class Main {
         }
     }
 
+    /*
+     *  Discount views
+     */
     private static void showDiscountList(Member member) {
-        SeniorDiscount discount = app.getDiscounts();
+        List<Discount> discounts = app.getDiscounts();
         ArrayList<String> options = new ArrayList<String>();
-        options.add(discount.getType() + " modifier " + discount.getModifier());
+
+        // TODO: show enabled discounts and add as an option only the available ones
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the discounts and create a string for the option label
+        for (int i = 0; i < discounts.size(); i++) {
+            Discount currentDiscount = discounts.get(i);
+            options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+        }
+
         int selectedDiscount = screenManager.setOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
+        // TODO: apply the discount (save it to the selected member)
     }
 }
