@@ -3,6 +3,7 @@ package examproject.cmd;
 import examproject.core.ManagementSystem;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Main {
 
@@ -64,7 +65,7 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // Add new member option
-                System.out.println("\nNot yet implemented!");
+                showMemberNewForm();
                 break;
             case 1:
                 // Back to main menu option
@@ -72,6 +73,7 @@ public class Main {
                 break;
         }
     }
+
 
     /*
      *  Treasurer views
@@ -103,5 +105,20 @@ public class Main {
                 showMainMenu();
                 break;
         }
+    }
+
+
+    /*
+     *  Member views
+     */
+    private static void showMemberNewForm() {
+        String firstName = screenManager.setStringInputView(" - [Chairman] Member first name: - ", 4, 10);
+        String lastName = screenManager.setStringInputView(" - [Chairman] Member last name: - ", 4, 10);
+        String cprNumber = screenManager.setStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
+
+        app.addMember(firstName, lastName, new Date(), cprNumber);
+
+        System.out.println(" Member added!");
+        showChairmanMenu();
     }
 }
