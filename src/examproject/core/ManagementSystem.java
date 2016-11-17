@@ -6,6 +6,7 @@ public class ManagementSystem {
 
     private PlaceholderFunctionalityProvider placeholderFunctionalityProvider;
     private Chairman currentChairman;
+    private Treasurer currentTreasurer;
 
     public ManagementSystem() {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
@@ -23,12 +24,19 @@ public class ManagementSystem {
         return true;
     }
 
+    /*
+     *  Treasurer Functionality
+     */
     // TODO: use response codes instead of boolean
-    protected boolean treasurerSignIn(String username, String password) {
-        // placeholder functionality -> signIn('treasurer', username, password);
-        return false;
+    public boolean treasurerSignIn(String username, String password) {
+        try {
+            this.currentTreasurer = this.placeholderFunctionalityProvider.getTreasurer(username, password);
+        } catch(IllegalArgumentException e) {
+            // TODO: Send the error message
+            return false;
+        }
+        return true;
     }
-
     /*
         Member functionality
      */
