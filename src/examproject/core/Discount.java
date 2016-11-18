@@ -1,6 +1,10 @@
 package examproject.core;
 
-public class Discount {
+public interface Discount {
 
-    double percent;
+    public double getModifier();
+    public boolean checkCondition(Member member);
+    public String getType();
 }
+
+
