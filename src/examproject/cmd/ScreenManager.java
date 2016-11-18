@@ -11,7 +11,7 @@ class ScreenManager {
         this.scanner = new Scanner(System.in);
     }
 
-    int setOptionsView(String label, ArrayList<String> options) {
+    int showOptionsView(String label, ArrayList<String> options) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
@@ -19,15 +19,15 @@ class ScreenManager {
             System.out.println(" [" + (i + 1) + "]   " + options.get(i));
         }
 
-        return setRangeInputView(1, options.size()) - 1;
+        return showRangeInputView(1, options.size()) - 1;
     }
 
-    void setInfoView(String label) {
+    void showInfoView(String label) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
     }
 
-    int setRangeInputView(int min, int max) {
+    int showRangeInputView(int min, int max) {
         System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
         while (true) {
             if (this.scanner.hasNextInt()) {
@@ -47,7 +47,7 @@ class ScreenManager {
         }
     }
 
-    String setStringInputView(String label, int minLength, int maxLength) {
+    String showStringInputView(String label, int minLength, int maxLength) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
