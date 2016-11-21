@@ -1,9 +1,12 @@
 package examproject.cmd;
 
 import examproject.core.ManagementSystem;
+import examproject.core.Discount;
+import examproject.core.Member;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Main {
 
@@ -18,6 +21,7 @@ public class Main {
         ArrayList<String> mainMenu = new ArrayList<String>();
         mainMenu.add("Chairman login.");
         mainMenu.add("Treasurer login.");
+        mainMenu.add("Coach login.");
 
         mainMenu.add("Exit.");
 
@@ -32,6 +36,9 @@ public class Main {
                 showTreasurerLogin();
                 break;
             case 2:
+                //Coach login option
+                showCoachLogin();
+            case 3:
                 // Exit option
                 break;
         }
@@ -90,10 +97,8 @@ public class Main {
             } else {
                 screenManager.showInfoView("Log in error");
             }
-
         }
     }
-
 
     private static void showTreasurerMenu() {
         ArrayList<String> treasurerMenu = new ArrayList<String>();
@@ -127,5 +132,45 @@ public class Main {
 
         System.out.println(" Member added!");
         showChairmanMenu();
+    }
+
+
+    /*
+     * Coach views
+     */
+    private static void showCoachLogin() {
+        while (true) {
+            String username = screenManager.showStringInputView(" - [Coach] username: - ", 4, 10);
+            String password = screenManager.showStringInputView(" - [Coach] password: - ", 4, 10);
+
+            boolean okStatus = app.coachSignIn(username, password);
+            if (okStatus) {
+                showCoachMenu();
+                return;
+            } else {
+                screenManager.showInfoView("Log in error!");
+            }
+        }
+    }
+
+    private static void showCoachMenu() {
+        ArrayList<String> coachMenu = new ArrayList<String>();
+        coachMenu.add("View my members.");
+
+        coachMenu.add("Log out (back to main menu).");
+
+        int selectedOption = screenManager.showOptionsView(" - Coach menu - ", coachMenu);
+        switch (selectedOption) {
+            case 0:
+                // View my members option
+                // TODO display only members assigned to specific coach
+                System.out.println("\nNot yet implemented!");
+                break;
+            case 1:
+                // Back to main menu option
+                showMainMenu();
+                break;
+        }
+
     }
 }

@@ -7,6 +7,7 @@ public class ManagementSystem {
     private PlaceholderFunctionalityProvider placeholderFunctionalityProvider;
     private Chairman currentChairman;
     private Treasurer currentTreasurer;
+    private Coach currentCoach;
 
     public ManagementSystem() {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
@@ -31,6 +32,20 @@ public class ManagementSystem {
     public boolean treasurerSignIn(String username, String password) {
         try {
             this.currentTreasurer = this.placeholderFunctionalityProvider.getTreasurer(username, password);
+        } catch(IllegalArgumentException e) {
+            // TODO: Send the error message
+            return false;
+        }
+        return true;
+    }
+    
+    /*
+     *  Coach Functionality
+     */
+    // TODO: use response codes instead of boolean
+    public boolean coachSignIn(String username, String password) {
+        try {
+            this.currentCoach = this.placeholderFunctionalityProvider.getCoach(username, password);
         } catch(IllegalArgumentException e) {
             // TODO: Send the error message
             return false;

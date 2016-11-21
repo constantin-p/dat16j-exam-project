@@ -28,6 +28,14 @@ public class PlaceholderFunctionalityProvider {
         }
     }
 
+    public static Coach getCoach(String username, String password) {
+        if (Objects.equals(username, "coach") && Objects.equals(password, "coach")) {
+            return new Coach(username, password);
+        } else {
+            throw new IllegalArgumentException("No coach with the given username & password!");
+        }
+    }
+
     public void setMember(Member member){
         this.currentMember = member;
 
