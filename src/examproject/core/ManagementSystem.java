@@ -9,13 +9,21 @@ public class ManagementSystem {
     private PlaceholderFunctionalityProvider placeholderFunctionalityProvider;
     private Chairman currentChairman;
     private Treasurer currentTreasurer;
-    private Coach currentCoach;
     private List<Discount> discounts = new ArrayList<Discount>();
-    private SeniorDiscount tmpDiscount;
+
+    private Coach currentCoach;
+    private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
 
     public ManagementSystem() {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
         this.discounts.add(new SeniorDiscount(0.25));
+
+        this.disciplines.add(new Discipline("Freestyle 100"));
+        this.disciplines.add(new Discipline("Freestyle 200"));
+        this.disciplines.add(new Discipline("Backstroke 100"));
+        this.disciplines.add(new Discipline("Backstroke 200"));
+        this.disciplines.add(new Discipline("Butterfly 100"));
+        this.disciplines.add(new Discipline("Butterfly 200"));
     }
 
     /*
@@ -96,5 +104,9 @@ public class ManagementSystem {
 
     public List<Discount> getDiscounts() {
         return this.discounts;
+    }
+
+    public ArrayList<Discipline> getDisciplines() {
+        return this.disciplines;
     }
 }

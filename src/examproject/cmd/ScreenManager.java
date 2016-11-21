@@ -27,6 +27,16 @@ class ScreenManager {
         System.out.println("\n" + label + "\n");
     }
 
+    // TODO: use showOptionsView
+    void showInfoView(String label, ArrayList data) {
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+        for (int i = 0; i < data.size(); i++) {
+            System.out.println(" [" + (i + 1) + "]   " + data.get(i));
+        }
+    }
+
     int showRangeInputView(int min, int max) {
         System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
         while (true) {

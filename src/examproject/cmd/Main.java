@@ -1,9 +1,6 @@
 package examproject.cmd;
 
-import examproject.core.Discount;
-import examproject.core.ManagementSystem;
-import examproject.core.Member;
-import examproject.core.SeniorDiscount;
+import examproject.core.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -155,7 +152,7 @@ public class Main {
             case 1:
                 // View leaderboards option
                 // TODO display array ofleaderboards for different disciplines of members assigned to coach
-                System.out.println("Not yet implemented!");
+                showDisciplineList();
                 break;
             case 2:
                 // Back to main menu option
@@ -164,6 +161,42 @@ public class Main {
         }
 
     }
+
+    /*
+     *  Discipline views
+     */
+    private static void showDisciplineList() {
+        ArrayList<Discipline> disciplines = app.getDisciplines();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < disciplines.size(); i++) {
+            Discipline currentDiscipline = disciplines.get(i);
+            options.add(currentDiscipline.name);
+        }
+
+        int selectedDisciplineIndex = screenManager.showOptionsView(" - Discipline list - ", options);
+        System.out.println("Not yet implemented!");
+//        showDisciplineLeaderboard(disciplines.get(selectedDisciplineIndex));
+    }
+
+    private static void showDisciplineLeaderboard(Discipline discipline) {
+        ArrayList<Member> leaderboardScores = discipline.getLeaderboard().getScores();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < leaderboardScores.size(); i++) {
+            Member currentParticipant = leaderboardScores.get(i);
+            options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
+        }
+
+
+        String viewLabel = " - <" + discipline.name + "> leaderboard - ";
+        screenManager.showInfoView(viewLabel, options);
+    }
+
 
 
     /*
@@ -259,7 +292,6 @@ public class Main {
                 break;
         }
     }
-
 
 
     /*
