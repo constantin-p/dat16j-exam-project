@@ -1,6 +1,8 @@
 package examproject.core;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ManagementSystem {
 
@@ -8,11 +10,17 @@ public class ManagementSystem {
     private Chairman currentChairman;
     private Treasurer currentTreasurer;
     private Coach currentCoach;
+    private List<Discount> discounts = new ArrayList<Discount>();
+    private SeniorDiscount tmpDiscount;
 
     public ManagementSystem() {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
+        this.discounts.add(new SeniorDiscount(0.25));
     }
 
+    /*
+     *  Chairman functionatily
+     */
     // TODO: use response codes instead of boolean
     public boolean chairmanSignIn(String username, String password) {
         try {
@@ -38,7 +46,7 @@ public class ManagementSystem {
         }
         return true;
     }
-    
+
     /*
      *  Coach Functionality
      */
@@ -53,20 +61,18 @@ public class ManagementSystem {
         return true;
     }
     /*
-        Member functionality
+     *  Member functionality
      */
     // TODO: use response codes instead of boolean
     public boolean addMember(String firstName, String lastName, Date dateOfBirth,String cprNumber) {
         // 1. check for duplicate   placeholder functionality -> getMember(...data);
         // 2. if unique, add the new member, error otherwise
-         boolean hasMember = this.placeholderFunctionalityProvider.getMember(cprNumber);
+        boolean hasMember = this.placeholderFunctionalityProvider.getMember(cprNumber);
         if(hasMember) {
             return false;
         }
         this.placeholderFunctionalityProvider.setMember(new Member(firstName, lastName, dateOfBirth, cprNumber));
         return true;
-
-
     }
 
 
@@ -82,5 +88,13 @@ public class ManagementSystem {
         // ?id
 
         return new Member("test", "test", new Date(), "test");
+    }
+
+    public ArrayList<Member> getMembers() {
+        return this.placeholderFunctionalityProvider.getMemberList();
+    }
+
+    public List<Discount> getDiscounts() {
+        return this.discounts;
     }
 }

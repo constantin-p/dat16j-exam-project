@@ -1,8 +1,9 @@
 package examproject.cmd;
 
-import examproject.core.ManagementSystem;
 import examproject.core.Discount;
+import examproject.core.ManagementSystem;
 import examproject.core.Member;
+import examproject.core.SeniorDiscount;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,7 +111,7 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // Show members option
-                System.out.println("\nNot yet implemented!");
+                showMemberList();
                 break;
             case 1:
                 // Back to main menu option
@@ -118,22 +119,6 @@ public class Main {
                 break;
         }
     }
-
-
-    /*
-     *  Member views
-     */
-    private static void showMemberNewForm() {
-        String firstName = screenManager.showStringInputView(" - [Chairman] Member first name: - ", 4, 10);
-        String lastName = screenManager.showStringInputView(" - [Chairman] Member last name: - ", 4, 10);
-        String cprNumber = screenManager.showStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
-
-        app.addMember(firstName, lastName, new Date(), cprNumber);
-
-        System.out.println(" Member added!");
-        showChairmanMenu();
-    }
-
 
     /*
      * Coach views
@@ -156,6 +141,7 @@ public class Main {
     private static void showCoachMenu() {
         ArrayList<String> coachMenu = new ArrayList<String>();
         coachMenu.add("View my members.");
+        coachMenu.add("View disciplines leaderboards");
 
         coachMenu.add("Log out (back to main menu).");
 
@@ -164,13 +150,135 @@ public class Main {
             case 0:
                 // View my members option
                 // TODO display only members assigned to specific coach
-                System.out.println("\nNot yet implemented!");
+                showCoachMemberList();
                 break;
             case 1:
+                // View leaderboards option
+                // TODO display array ofleaderboards for different disciplines of members assigned to coach
+                System.out.println("Not yet implemented!");
+                break;
+            case 2:
                 // Back to main menu option
                 showMainMenu();
                 break;
         }
 
+    }
+
+
+    /*
+     *  Member views (Coach)
+     */
+
+    private static void showCoachMemberList() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Coach Member list - ", options);
+        showCoachMemberActions(members.get(selectedMemberIndex));
+    }
+
+    private static void showCoachMemberActions(Member member) {
+        ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
+        coachMemberActionsMenu.add("Available competitions.");
+        coachMemberActionsMenu.add("Members list (back to member list).");
+
+        coachMemberActionsMenu.add("Exit (back to coach menu)");
+
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, coachMemberActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // View available competitions
+                System.out.println("Not yet implemented!");
+                break;
+            case 1:
+                // Back to member list option
+                showCoachMemberList();
+                break;
+            case 2:
+                // Back to coach menu
+                showCoachMenu();
+        }
+    }
+
+
+    /*
+     *  Member views (Treasurer)
+     */
+    private static void showMemberNewForm() {
+        String firstName = screenManager.showStringInputView(" - [Chairman] Member first name: - ", 4, 10);
+        String lastName = screenManager.showStringInputView(" - [Chairman] Member last name: - ", 4, 10);
+        String cprNumber = screenManager.showStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
+
+        // TODO: return validation, member already registered error messages
+        app.addMember(firstName, lastName, new Date(), cprNumber);
+
+        screenManager.showInfoView("Member added");
+        showChairmanMenu();
+    }
+
+    private static void showMemberList() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
+        showMemberActions(members.get(selectedMemberIndex));
+    }
+
+    private static void showMemberActions(Member member) {
+        ArrayList<String> memberActionsMenu = new ArrayList<String>();
+        memberActionsMenu.add("Apply discount.");
+
+        memberActionsMenu.add("Members list (back to member list).");
+
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // Show discount option
+                showDiscountList(member);
+                break;
+            case 1:
+                // Back to member list option
+                showMemberList();
+                break;
+        }
+    }
+
+
+
+    /*
+     *  Discount views
+     */
+    private static void showDiscountList(Member member) {
+        List<Discount> discounts = app.getDiscounts();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // TODO: show enabled discounts and add as an option only the available ones
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the discounts and create a string for the option label
+        for (int i = 0; i < discounts.size(); i++) {
+            Discount currentDiscount = discounts.get(i);
+            options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+        }
+
+        int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
+        System.out.println(selectedDiscount);
+        // TODO: apply the discount (save it to the selected member)
     }
 }
