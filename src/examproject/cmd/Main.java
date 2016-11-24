@@ -102,6 +102,7 @@ public class Main {
     private static void showTreasurerMenu() {
         ArrayList<String> treasurerMenu = new ArrayList<String>();
         treasurerMenu.add("Show members.");
+        treasurerMenu.add("Show members with late payments.");
 
         treasurerMenu.add("Log out (back to main menu).");
 
@@ -112,6 +113,10 @@ public class Main {
                 showMemberList();
                 break;
             case 1:
+                // Show members with late payments option
+                showMembersWithLatePayments();
+                break;
+            case 2:
                 // Back to main menu option
                 showMainMenu();
                 break;
@@ -130,7 +135,7 @@ public class Main {
         // TODO: return validation, member already registered error messages
         app.addMember(firstName, lastName, new Date(), cprNumber);
 
-        screenManager.setInfoView("Member added");
+        screenManager.showInfoView("Member added");
         showChairmanMenu();
     }
 
@@ -145,7 +150,7 @@ public class Main {
             options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
         }
 
-        int selectedMemberIndex = screenManager.setOptionsView(" - Member list - ", options);
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
         showMemberActions(members.get(selectedMemberIndex));
     }
 
@@ -156,7 +161,7 @@ public class Main {
         memberActionsMenu.add("Members list (back to member list).");
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
-        int selectedOption = screenManager.setOptionsView(viewLabel, memberActionsMenu);
+        int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
         switch (selectedOption) {
             case 0:
                 // Show discount option
@@ -169,6 +174,20 @@ public class Main {
         }
     }
 
+    private static void showMembersWithLatePayments() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
+        showMemberActions(members.get(selectedMemberIndex));
+    }
     /*
      *  Discount views
      */
@@ -184,7 +203,7 @@ public class Main {
             options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
         }
 
-        int selectedDiscount = screenManager.setOptionsView(" - Discount list - ", options);
+        int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
     }

@@ -10,6 +10,8 @@ public class Member {
     public String preferredActivity;
     public Date dateOfBirth;
     public String cprNumber;
+
+    public double fee;
     public ArrayList<Payment> payments;
 
     public Member(String firstName, String lastName, Date dateOfBirth, String cprNumber) {
