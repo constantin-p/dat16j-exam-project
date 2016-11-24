@@ -2,6 +2,9 @@ package examproject.core;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +20,9 @@ public class ManagementSystem {
     private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
 
     public ManagementSystem() {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/mm/yyyy");
+        ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
+        System.out.println(utc + "  " + utc.getYear() + " " + utc.format(format));
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
         this.discounts.add(new SeniorDiscount(0.25));
 
