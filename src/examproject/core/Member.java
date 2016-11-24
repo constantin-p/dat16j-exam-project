@@ -13,6 +13,8 @@ public class Member {
     public String preferredActivity;
     public Date dateOfBirth;
     public String cprNumber;
+
+    public double fee = 1000.0;
     public ZonedDateTime dateOfRegistration;
     public ArrayList<Payment> payments = new ArrayList<Payment>();
 
@@ -22,6 +24,10 @@ public class Member {
         this.dateOfBirth = dateOfBirth;
         this.cprNumber = cprNumber;
         this.dateOfRegistration = dateOfRegistration;
+    }
+
+    public double calculateFee() {
+        return fee;
     }
 
     public void registerPayment(Payment payment) {

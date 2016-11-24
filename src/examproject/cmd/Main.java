@@ -285,6 +285,7 @@ public class Main {
     private static void showMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
         memberActionsMenu.add("Apply discount.");
+        memberActionsMenu.add("Pay fee.");
 
         memberActionsMenu.add("Members list (back to member list).");
 
@@ -296,8 +297,34 @@ public class Main {
                 showDiscountList(member);
                 break;
             case 1:
+                // Show discount option
+                showPaymentActions(member);
+                break;
+            case 2:
                 // Back to member list option
                 showMemberList();
+                break;
+        }
+    }
+
+    private static void showPaymentActions(Member member) {
+        ArrayList<String> paymentActionsMenu = new ArrayList<String>();
+        paymentActionsMenu.add("Accept (pay fee).");
+        paymentActionsMenu.add("Decline (back to member actions menu).");
+
+        double feeValue = member.calculateFee();
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> pay fee of: " + feeValue + " - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, paymentActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // Accept (pay fee) option
+                member.registerPayment(new Payment(feeValue, "Member fee", ZonedDateTime.now(ZoneOffset.UTC)));
+                screenManager.showInfoView("Payment registered!");
+                showMemberActions(member);
+                break;
+            case 1:
+                // Decline (back to member actions menu) option
+                showMemberActions(member);
                 break;
         }
     }
