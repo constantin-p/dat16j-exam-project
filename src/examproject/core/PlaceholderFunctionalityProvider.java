@@ -1,5 +1,7 @@
 package examproject.core;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -39,12 +41,13 @@ public class PlaceholderFunctionalityProvider {
 
     public static ArrayList<Member> getMemberList() {
         ArrayList<Member> members = new ArrayList<Member>();
+        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
 
         // Dummy data
-        members.add(new Member("Albert", "Taber", new Date(), "2303944734"));
-        members.add(new Member("Leslie", "Shilling", new Date(), "1404936473"));
-        members.add(new Member("Nolan", "Blane", new Date(), "0207894235"));
-        members.add(new Member("Cassi", "Kleinman", new Date(), "2612786432"));
+        members.add(new Member("Albert", "Taber", new Date(), "2303944734", dateOfRegistrationUTC));
+        members.add(new Member("Leslie", "Shilling", new Date(), "1404936473", dateOfRegistrationUTC));
+        members.add(new Member("Nolan", "Blane", new Date(), "0207894235", dateOfRegistrationUTC));
+        members.add(new Member("Cassi", "Kleinman", new Date(), "2612786432", dateOfRegistrationUTC));
 
         return members;
     }

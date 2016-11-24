@@ -5,6 +5,8 @@ import examproject.core.ManagementSystem;
 import examproject.core.Member;
 import examproject.core.SeniorDiscount;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -127,10 +129,12 @@ public class Main {
         String lastName = screenManager.showStringInputView(" - [Chairman] Member last name: - ", 4, 10);
         String cprNumber = screenManager.showStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
 
+        // ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.parse("2012-06-10T10:10:10Z[UTC]");
         // TODO: return validation, member already registered error messages
-        app.addMember(firstName, lastName, new Date(), cprNumber);
+        app.addMember(firstName, lastName, new Date(), cprNumber, dateOfRegistrationUTC);
 
-        screenManager.setInfoView("Member added");
+        screenManager.showInfoView("Member added");
         showChairmanMenu();
     }
 
@@ -145,7 +149,7 @@ public class Main {
             options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
         }
 
-        int selectedMemberIndex = screenManager.setOptionsView(" - Member list - ", options);
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
         showMemberActions(members.get(selectedMemberIndex));
     }
 
@@ -156,7 +160,7 @@ public class Main {
         memberActionsMenu.add("Members list (back to member list).");
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
-        int selectedOption = screenManager.setOptionsView(viewLabel, memberActionsMenu);
+        int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
         switch (selectedOption) {
             case 0:
                 // Show discount option
@@ -184,7 +188,7 @@ public class Main {
             options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
         }
 
-        int selectedDiscount = screenManager.setOptionsView(" - Discount list - ", options);
+        int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
     }
