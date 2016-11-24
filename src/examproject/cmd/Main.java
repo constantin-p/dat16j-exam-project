@@ -1,9 +1,6 @@
 package examproject.cmd;
 
-import examproject.core.Discount;
-import examproject.core.ManagementSystem;
-import examproject.core.Member;
-import examproject.core.SeniorDiscount;
+import examproject.core.*;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -24,6 +21,7 @@ public class Main {
         ArrayList<String> mainMenu = new ArrayList<String>();
         mainMenu.add("Chairman login.");
         mainMenu.add("Treasurer login.");
+        mainMenu.add("Coach login.");
 
         mainMenu.add("Exit.");
 
@@ -38,6 +36,9 @@ public class Main {
                 showTreasurerLogin();
                 break;
             case 2:
+                //Coach login option
+                showCoachLogin();
+            case 3:
                 // Exit option
                 break;
         }
@@ -96,10 +97,8 @@ public class Main {
             } else {
                 screenManager.showInfoView("Log in error");
             }
-
         }
     }
-
 
     private static void showTreasurerMenu() {
         ArrayList<String> treasurerMenu = new ArrayList<String>();
@@ -120,9 +119,134 @@ public class Main {
         }
     }
 
+    /*
+     * Coach views
+     */
+    private static void showCoachLogin() {
+        while (true) {
+            String username = screenManager.showStringInputView(" - [Coach] username: - ", 4, 10);
+            String password = screenManager.showStringInputView(" - [Coach] password: - ", 4, 10);
+
+            boolean okStatus = app.coachSignIn(username, password);
+            if (okStatus) {
+                showCoachMenu();
+                return;
+            } else {
+                screenManager.showInfoView("Log in error!");
+            }
+        }
+    }
+
+    private static void showCoachMenu() {
+        ArrayList<String> coachMenu = new ArrayList<String>();
+        coachMenu.add("View my members.");
+        coachMenu.add("View disciplines leaderboards");
+
+        coachMenu.add("Log out (back to main menu).");
+
+        int selectedOption = screenManager.showOptionsView(" - Coach menu - ", coachMenu);
+        switch (selectedOption) {
+            case 0:
+                // View my members option
+                // TODO display only members assigned to specific coach
+                showCoachMemberList();
+                break;
+            case 1:
+                // View leaderboards option
+                // TODO display array ofleaderboards for different disciplines of members assigned to coach
+                showDisciplineList();
+                break;
+            case 2:
+                // Back to main menu option
+                showMainMenu();
+                break;
+        }
+
+    }
 
     /*
-     *  Member views
+     *  Discipline views
+     */
+    private static void showDisciplineList() {
+        ArrayList<Discipline> disciplines = app.getDisciplines();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < disciplines.size(); i++) {
+            Discipline currentDiscipline = disciplines.get(i);
+            options.add(currentDiscipline.name);
+        }
+
+        int selectedDisciplineIndex = screenManager.showOptionsView(" - Discipline list - ", options);
+        System.out.println("Not yet implemented!");
+//        showDisciplineLeaderboard(disciplines.get(selectedDisciplineIndex));
+    }
+
+    private static void showDisciplineLeaderboard(Discipline discipline) {
+        ArrayList<Member> leaderboardScores = discipline.getLeaderboard().getScores();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < leaderboardScores.size(); i++) {
+            Member currentParticipant = leaderboardScores.get(i);
+            options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
+        }
+
+
+        String viewLabel = " - <" + discipline.name + "> leaderboard - ";
+        screenManager.showInfoView(viewLabel, options);
+    }
+
+
+
+    /*
+     *  Member views (Coach)
+     */
+
+    private static void showCoachMemberList() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Coach Member list - ", options);
+        showCoachMemberActions(members.get(selectedMemberIndex));
+    }
+
+    private static void showCoachMemberActions(Member member) {
+        ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
+        coachMemberActionsMenu.add("Available competitions.");
+        coachMemberActionsMenu.add("Members list (back to member list).");
+
+        coachMemberActionsMenu.add("Exit (back to coach menu)");
+
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, coachMemberActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // View available competitions
+                System.out.println("Not yet implemented!");
+                break;
+            case 1:
+                // Back to member list option
+                showCoachMemberList();
+                break;
+            case 2:
+                // Back to coach menu
+                showCoachMenu();
+        }
+    }
+
+
+    /*
+     *  Member views (Treasurer)
      */
     private static void showMemberNewForm() {
         String firstName = screenManager.showStringInputView(" - [Chairman] Member first name: - ", 4, 10);
@@ -172,6 +296,7 @@ public class Main {
                 break;
         }
     }
+
 
     /*
      *  Discount views
