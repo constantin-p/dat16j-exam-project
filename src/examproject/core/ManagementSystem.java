@@ -20,6 +20,7 @@ public class ManagementSystem {
     private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
 
     public ManagementSystem() {
+        // TODO: remove
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/mm/yyyy");
         ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
         System.out.println(utc + "  " + utc.getYear() + " " + utc.format(format));

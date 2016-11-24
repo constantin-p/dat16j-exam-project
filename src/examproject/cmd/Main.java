@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Main {
 
@@ -275,7 +276,13 @@ public class Main {
         // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+            String currentMemberDicounts = currentMember.getAppliedDiscountsString();
+
+            if(Objects.equals(currentMemberDicounts, "")) {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " No discounts applied for this account.");
+            } else {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " discounts: " + currentMemberDicounts);
+            }
         }
 
         int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
@@ -285,9 +292,13 @@ public class Main {
     private static void showMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
         memberActionsMenu.add("Apply discount.");
-        memberActionsMenu.add("Pay fee.");
-
+        if (member.hasPaidThisYear()) {
+            memberActionsMenu.add("Pay fee (already paid this year's fee).");
+        } else {
+            memberActionsMenu.add("Pay fee.");
+        }
         memberActionsMenu.add("Members list (back to member list).");
+
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
         int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
@@ -297,8 +308,12 @@ public class Main {
                 showDiscountList(member);
                 break;
             case 1:
-                // Show discount option
-                showPaymentActions(member);
+                // Show payment option
+                if (member.hasPaidThisYear()) {
+                    showMemberActions(member); // loop
+                } else {
+                    showPaymentActions(member);
+                }
                 break;
             case 2:
                 // Back to member list option
@@ -363,11 +378,20 @@ public class Main {
         // loop throw all the discounts and create a string for the option label
         for (int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
-            options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+            System.out.println(member.hasDiscount(currentDiscount));
+            if (!member.hasDiscount(currentDiscount)) {
+                options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+            } else {
+                discounts.remove(i);
+                i--;
+            }
         }
 
         int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
+        member.applyDiscount(discounts.get(selectedDiscount));
+        screenManager.showInfoView("Discount applied!");
+        showMemberActions(member);
     }
 }
