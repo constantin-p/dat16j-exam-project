@@ -2,6 +2,7 @@ package examproject.cmd;
 
 import examproject.core.*;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ public class Main {
         mainMenu.add("Coach login.");
 
         mainMenu.add("Exit.");
+        mainMenu.add("TEST date input.");
 
         int selectedOption = screenManager.showOptionsView(" - Main menu - ", mainMenu);
         switch (selectedOption) {
@@ -39,6 +41,9 @@ public class Main {
             case 3:
                 // Exit option
                 break;
+            case 4:
+                // Exit option
+                screenManager.showDateInputView("Test date");
         }
     }
 
@@ -221,8 +226,9 @@ public class Main {
     private static void showCoachMemberActions(Member member) {
         ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
         coachMemberActionsMenu.add("Available competitions.");
-        coachMemberActionsMenu.add("Members list (back to member list).");
+        coachMemberActionsMenu.add("Register time.");
 
+        coachMemberActionsMenu.add("Members list (back to member list).");
         coachMemberActionsMenu.add("Exit (back to coach menu)");
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
@@ -233,10 +239,15 @@ public class Main {
                 System.out.println("Not yet implemented!");
                 break;
             case 1:
+                // Register time
+                showMemberTimeForm(member);
+                break;
+
+            case 2:
                 // Back to member list option
                 showCoachMemberList();
                 break;
-            case 2:
+            case 3:
                 // Back to coach menu
                 showCoachMenu();
         }
@@ -257,6 +268,45 @@ public class Main {
         screenManager.showInfoView("Member added");
         showChairmanMenu();
     }
+
+    private static void showMemberTimeForm(Member member) {
+        String time = screenManager.showTimeInputView(" - [Register time] Time: - ");
+        ZonedDateTime date = screenManager.showDateInputView(" - [Register time] Date: - ");
+        // Type
+
+
+        screenManager.showInfoView("Time: " + time + " | Date: " + date);
+
+        ArrayList<String> resultTypeActionsMenu = new ArrayList<String>();
+        resultTypeActionsMenu.add("Competition time.");
+        resultTypeActionsMenu.add("Individual time.");
+
+        resultTypeActionsMenu.add("Member action list (back to member actions).");
+
+
+        String viewLabel = " - <Time: " + time + " | Date: " + date + "> result type - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, resultTypeActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // View available competitions
+                System.out.println("Not yet implemented!");
+
+                break;
+            case 1:
+                member.registerLapTime(new LapTime(time, date));
+                screenManager.showInfoView("Lap time registered: " + time + " on " + date);
+                // Back to member actions option
+                showCoachMemberActions(member);
+                break;
+
+            case 2:
+                // Back to member actions option
+                showCoachMemberActions(member);
+                break;
+        }
+    }
+
+
 
     private static void showMemberList() {
         ArrayList<Member> members = app.getMembers();

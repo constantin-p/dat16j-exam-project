@@ -10,7 +10,8 @@ public class Member {
     public String preferredActivity;
     public Date dateOfBirth;
     public String cprNumber;
-    public ArrayList<Payment> payments;
+    public ArrayList<Payment> payments = new ArrayList<Payment>();
+    public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
 
     public Member(String firstName, String lastName, Date dateOfBirth, String cprNumber) {
         this.firstName = firstName;
@@ -21,5 +22,9 @@ public class Member {
 
     public void registerPayment(Payment payment) {
         this.payments.add(payment);
+    }
+
+    public void registerLapTime(LapTime lapTime) {
+        this.lapTimes.add(lapTime);
     }
 }
