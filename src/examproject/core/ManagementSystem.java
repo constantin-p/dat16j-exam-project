@@ -1,5 +1,10 @@
 package examproject.core;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +24,10 @@ public class ManagementSystem {
     private HashMap<String, Discipline> disciplineMap = new HashMap();
 
     public ManagementSystem() {
+        // TODO: remove
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/mm/yyyy");
+        ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
+        System.out.println(utc + "  " + utc.getYear() + " " + utc.format(format));
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
         this.discounts.add(new SeniorDiscount(0.25));
 
@@ -88,14 +97,18 @@ public class ManagementSystem {
      *  Member functionality
      */
     // TODO: use response codes instead of boolean
-    public boolean addMember(String firstName, String lastName, Date dateOfBirth,String cprNumber) {
+    public boolean addMember(String firstName, String lastName, Date dateOfBirth, String cprNumber, ZonedDateTime dateOfRegistration) {
         // 1. check for duplicate   placeholder functionality -> getMember(...data);
         // 2. if unique, add the new member, error otherwise
         boolean hasMember = this.placeholderFunctionalityProvider.getMember(cprNumber);
         if(hasMember) {
             return false;
         }
-        this.placeholderFunctionalityProvider.setMember(new Member(firstName, lastName, dateOfBirth, cprNumber));
+        Member member = new Member(firstName, lastName, dateOfBirth, cprNumber, dateOfRegistration);
+        // member.registerPayment(new Payment(1005.0, "Membership fee", ZonedDateTime.now(ZoneOffset.UTC)));
+        System.out.println(member.hasLatePayment().status + " " + member.hasLatePayment().info);
+        this.placeholderFunctionalityProvider.setMember(member);
+
         return true;
     }
 
@@ -103,15 +116,15 @@ public class ManagementSystem {
     protected Member getMember(String id) {
         // placeholder functionality -> getMember(...id);
         // ?id
-
-        return new Member("test", "test", new Date(), "test");
+        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        return new Member("test", "test", new Date(), "test", dateOfRegistrationUTC);
     }
 
     protected Member updateMember(String username, String password) {
         // placeholder functionality -> getMember(...id);
         // ?id
-
-        return new Member("test", "test", new Date(), "test");
+        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        return new Member("test", "test", new Date(), "test", dateOfRegistrationUTC);
     }
 
     public ArrayList<Member> getMembers() {

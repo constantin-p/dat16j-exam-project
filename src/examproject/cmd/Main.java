@@ -2,6 +2,8 @@ package examproject.cmd;
 
 import examproject.core.*;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -102,6 +104,7 @@ public class Main {
     private static void showTreasurerMenu() {
         ArrayList<String> treasurerMenu = new ArrayList<String>();
         treasurerMenu.add("Show members.");
+        treasurerMenu.add("Show members with late payments.");
 
         treasurerMenu.add("Log out (back to main menu).");
 
@@ -112,6 +115,10 @@ public class Main {
                 showMemberList();
                 break;
             case 1:
+                // Show members with late payments option
+                showMembersWithLatePayments();
+                break;
+            case 2:
                 // Back to main menu option
                 showMainMenu();
                 break;
@@ -268,8 +275,10 @@ public class Main {
         String lastName = screenManager.showStringInputView(" - [Chairman] Member last name: - ", 4, 10);
         String cprNumber = screenManager.showStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
 
+        // ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.parse("2012-06-10T10:10:10Z[UTC]");
         // TODO: return validation, member already registered error messages
-        app.addMember(firstName, lastName, new Date(), cprNumber);
+        app.addMember(firstName, lastName, new Date(), cprNumber, dateOfRegistrationUTC);
 
         screenManager.showInfoView("Member added");
         showChairmanMenu();
@@ -298,25 +307,113 @@ public class Main {
 
     private static void showMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
-        memberActionsMenu.add("Apply discount.");
+        ArrayList<String> disabledMemberActionsMenu = new ArrayList<String>();
 
+        List<Discount> discounts = app.getDiscounts();
+        boolean discountsAvailable = false;
+        for(int i = 0; i < discounts.size(); i++) {
+            if(!member.hasDiscount(discounts.get(i))) {
+                discountsAvailable = true;
+                break;
+            }
+        }
+        System.out.println(discountsAvailable + " " + discounts.size());
+        if (discountsAvailable)  {
+            memberActionsMenu.add("Apply discount.");
+        } else {
+         disabledMemberActionsMenu.add("Apply discount.");
+        }
+        if (member.hasPaidThisYear()) {
+            disabledMemberActionsMenu.add("Pay fee (already paid this year's fee).");
+        } else {
+            memberActionsMenu.add("Pay fee.");
+        }
         memberActionsMenu.add("Members list (back to member list).");
 
+
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
+        int selectedOption = screenManager.showOptionsView(viewLabel, disabledMemberActionsMenu, memberActionsMenu);
         switch (selectedOption) {
+
             case 0:
                 // Show discount option
-                showDiscountList(member);
+                if (discountsAvailable) {
+                    showDiscountList(member);
+                } else {
+                    // Show payment option
+                    if (member.hasPaidThisYear()) {
+                        showMemberList();
+                    } else {
+                        showPaymentActions(member);
+                    }
+                }
+
                 break;
             case 1:
+                // Show payment option
+
+                if (discountsAvailable) {
+                    if (member.hasPaidThisYear()) {
+                        showMemberActions(member); // loop
+                    } else {
+                        showPaymentActions(member);
+                    }
+                } else {
+                    // Show payment option
+                    showMemberList();
+                }
+                break;
+            case 2:
                 // Back to member list option
                 showMemberList();
                 break;
         }
     }
 
+    private static void showPaymentActions(Member member) {
+        ArrayList<String> paymentActionsMenu = new ArrayList<String>();
+        paymentActionsMenu.add("Accept (pay fee).");
+        paymentActionsMenu.add("Decline (back to member actions menu).");
 
+        double feeValue = member.calculateFee();
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> pay fee of: " + feeValue + " - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, paymentActionsMenu);
+        switch (selectedOption) {
+            case 0:
+                // Accept (pay fee) option
+                member.registerPayment(new Payment(feeValue, "Member fee", ZonedDateTime.now(ZoneOffset.UTC)));
+                screenManager.showInfoView("Payment registered!");
+                showMemberActions(member);
+                break;
+            case 1:
+                // Decline (back to member actions menu) option
+                showMemberActions(member);
+                break;
+        }
+    }
+
+
+    private static void showMembersWithLatePayments() {
+        ArrayList<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            Response hasLatePayment = currentMember.hasLatePayment();
+            if(hasLatePayment.status) {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " late for: " + hasLatePayment.info);
+
+            } else {
+                members.remove(i);
+                i--;
+            }
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
+        showMemberActions(members.get(selectedMemberIndex));
+    }
     /*
      *  Discount views
      */
@@ -329,12 +426,20 @@ public class Main {
         // loop throw all the discounts and create a string for the option label
         for (int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
-            options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+            System.out.println(member.hasDiscount(currentDiscount));
+            if (!member.hasDiscount(currentDiscount)) {
+                options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+            } else {
+                discounts.remove(i);
+                i--;
+            }
         }
 
         int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
         member.applyDiscount(discounts.get(selectedDiscount));
+        screenManager.showInfoView("Discount applied!");
+        showMemberActions(member);
     }
 }
