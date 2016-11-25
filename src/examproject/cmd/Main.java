@@ -291,9 +291,24 @@ public class Main {
 
     private static void showMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
-        memberActionsMenu.add("Apply discount.");
+        ArrayList<String> disabledMemberActionsMenu = new ArrayList<String>();
+
+        List<Discount> discounts = app.getDiscounts();
+        boolean discountsAvailable = false;
+        for(int i = 0; i < discounts.size(); i++) {
+            if(!member.hasDiscount(discounts.get(i))) {
+                discountsAvailable = true;
+                break;
+            }
+        }
+        System.out.println(discountsAvailable + " " + discounts.size());
+        if (discountsAvailable)  {
+            memberActionsMenu.add("Apply discount.");
+        } else {
+         disabledMemberActionsMenu.add("Apply discount.");
+        }
         if (member.hasPaidThisYear()) {
-            memberActionsMenu.add("Pay fee (already paid this year's fee).");
+            disabledMemberActionsMenu.add("Pay fee (already paid this year's fee).");
         } else {
             memberActionsMenu.add("Pay fee.");
         }
@@ -301,18 +316,35 @@ public class Main {
 
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, memberActionsMenu);
+        int selectedOption = screenManager.showOptionsView(viewLabel, disabledMemberActionsMenu, memberActionsMenu);
         switch (selectedOption) {
+
             case 0:
                 // Show discount option
-                showDiscountList(member);
+                if (discountsAvailable) {
+                    showDiscountList(member);
+                } else {
+                    // Show payment option
+                    if (member.hasPaidThisYear()) {
+                        showMemberList();
+                    } else {
+                        showPaymentActions(member);
+                    }
+                }
+
                 break;
             case 1:
                 // Show payment option
-                if (member.hasPaidThisYear()) {
-                    showMemberActions(member); // loop
+
+                if (discountsAvailable) {
+                    if (member.hasPaidThisYear()) {
+                        showMemberActions(member); // loop
+                    } else {
+                        showPaymentActions(member);
+                    }
                 } else {
-                    showPaymentActions(member);
+                    // Show payment option
+                    showMemberList();
                 }
                 break;
             case 2:

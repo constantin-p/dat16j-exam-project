@@ -53,7 +53,6 @@ public class Member {
         return false;
     }
 
-
     public Response hasLatePayment() {
         int startYear = Integer.parseInt(this.dateOfRegistration.format(DateTimeFormatter.ofPattern("yyyy")));
         int currentYear = Integer.parseInt(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy")));
@@ -78,6 +77,7 @@ public class Member {
     public void applyDiscount(Discount discount) {
         this.appliedDiscounts.add(discount.getType());
         this.appliedModifiers.add(discount.getModifier());
+
     }
 
     public void removeDiscount(Discount discount) {
