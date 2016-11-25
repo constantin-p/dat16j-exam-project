@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Main {
 
@@ -197,7 +198,6 @@ public class Main {
             options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
         }
 
-
         String viewLabel = " - <" + discipline.name + "> leaderboard - ";
         screenManager.showInfoView(viewLabel, options);
     }
@@ -316,7 +316,13 @@ public class Main {
         // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+            String currentMemberDicounts = currentMember.getAppliedDiscountsString();
+
+            if(Objects.equals(currentMemberDicounts, "")) {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " No discounts applied for this account.");
+            } else {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " discounts: " + currentMemberDicounts);
+            }
         }
 
         int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
@@ -362,5 +368,6 @@ public class Main {
         int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
         System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
+        member.applyDiscount(discounts.get(selectedDiscount));
     }
 }
