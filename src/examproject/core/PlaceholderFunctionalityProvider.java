@@ -28,6 +28,14 @@ public class PlaceholderFunctionalityProvider {
         }
     }
 
+    public static Coach getCoach(String username, String password) {
+        if (Objects.equals(username, "coach") && Objects.equals(password, "coach")) {
+            return new Coach(username, password);
+        } else {
+            throw new IllegalArgumentException("No coach with the given username & password!");
+        }
+    }
+
     public void setMember(Member member){
         this.currentMember = member;
 
@@ -41,10 +49,10 @@ public class PlaceholderFunctionalityProvider {
         ArrayList<Member> members = new ArrayList<Member>();
 
         // Dummy data
-        members.add(new Member("test", "test", new Date(), "test"));
-        members.add(new Member("test", "test", new Date(), "test"));
-        members.add(new Member("test", "test", new Date(), "test"));
-        members.add(new Member("test", "test", new Date(), "test"));
+        members.add(new Member("Albert", "Taber", new Date(), "2303944734"));
+        members.add(new Member("Leslie", "Shilling", new Date(), "1404936473"));
+        members.add(new Member("Nolan", "Blane", new Date(), "0207894235"));
+        members.add(new Member("Cassi", "Kleinman", new Date(), "2612786432"));
 
         return members;
     }
