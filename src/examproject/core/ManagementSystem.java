@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class ManagementSystem {
@@ -16,8 +17,11 @@ public class ManagementSystem {
     private Treasurer currentTreasurer;
     private List<Discount> discounts = new ArrayList<Discount>();
 
+    private ArrayList<Competition> competitions = new ArrayList<Competition>();
+
     private Coach currentCoach;
     private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
+    private HashMap<String, Discipline> disciplineMap = new HashMap();
 
     public ManagementSystem() {
         // TODO: remove
@@ -27,12 +31,24 @@ public class ManagementSystem {
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
         this.discounts.add(new SeniorDiscount(0.25));
 
+
         this.disciplines.add(new Discipline("Freestyle 100"));
+        this.disciplineMap.put("freestyle-100", this.disciplines.get(this.disciplines.size() - 1));
         this.disciplines.add(new Discipline("Freestyle 200"));
+        this.disciplineMap.put("freestyle-200", this.disciplines.get(this.disciplines.size() - 1));
         this.disciplines.add(new Discipline("Backstroke 100"));
+        this.disciplineMap.put("backstroke-100", this.disciplines.get(this.disciplines.size() - 1));
         this.disciplines.add(new Discipline("Backstroke 200"));
+        this.disciplineMap.put("backstroke-200", this.disciplines.get(this.disciplines.size() - 1));
         this.disciplines.add(new Discipline("Butterfly 100"));
+        this.disciplineMap.put("butterfly-100", this.disciplines.get(this.disciplines.size() - 1));
         this.disciplines.add(new Discipline("Butterfly 200"));
+        this.disciplineMap.put("butterfly-200", this.disciplines.get(this.disciplines.size() - 1));
+
+        this.competitions.add(new Competition("World Aquatics - freestyle", this.disciplineMap.get("freestyle-100")));
+        this.competitions.add(new Competition("Duel in the Pool - butterfly", this.disciplineMap.get("butterfly-200")));
+        this.competitions.add(new Competition("Back it up - backstroke", this.disciplineMap.get("backstroke-100")));
+        this.competitions.add(new Competition("Last one alive wins - freestyle", this.disciplineMap.get("freestyle-200")));
     }
 
     /*
@@ -122,4 +138,9 @@ public class ManagementSystem {
     public ArrayList<Discipline> getDisciplines() {
         return this.disciplines;
     }
+    public ArrayList<Competition> getCompetitions(){
+        return this.competitions;
+    }
+
 }
+
