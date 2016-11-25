@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -20,6 +23,21 @@ class ScreenManager {
     int showOptionsView(String label, ArrayList<String> options) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
+
+        for (int i = 0; i < options.size(); i++) {
+            System.out.println(" [" + (i + 1) + "]   " + options.get(i));
+        }
+
+        return showRangeInputView(1, options.size()) - 1;
+    }
+
+    int showOptionsView(String label, ArrayList<String> disabledOptions, ArrayList<String> options) {
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+        for (int i = 0; i < disabledOptions.size(); i++) {
+            System.out.println(" [*]   " + disabledOptions.get(i));
+        }
 
         for (int i = 0; i < options.size(); i++) {
             System.out.println(" [" + (i + 1) + "]   " + options.get(i));

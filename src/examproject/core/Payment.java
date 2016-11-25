@@ -1,14 +1,16 @@
 package examproject.core;
 
+import java.time.ZonedDateTime;
+
 public class Payment {
 
-    private double total;
-    private double paid;
+    private double amount;
     private String details;
+    public ZonedDateTime paymentDate;
 
-    public Payment(double total, double paid, String details) {
-        this.total = total;
-        this.paid = paid;
+    public Payment(double amount, String details, ZonedDateTime paymentDate) {
+        this.amount = amount;
         this.details = details;
+        this.paymentDate = paymentDate;
     }
 }
