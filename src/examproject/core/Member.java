@@ -10,6 +10,7 @@ public class Member {
     public String preferredActivity;
     public Date dateOfBirth;
     public String cprNumber;
+    private ArrayList<String> appliedDiscounts = new ArrayList<String>();
     public ArrayList<Payment> payments;
 
     public Member(String firstName, String lastName, Date dateOfBirth, String cprNumber) {
@@ -17,6 +18,31 @@ public class Member {
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.cprNumber = cprNumber;
+    }
+
+
+    public void applyDiscount(Discount discount) {
+        this.appliedDiscounts.add(discount.getType());
+    }
+
+    public void removeDiscount(Discount discount) {
+        int index = this.appliedDiscounts.indexOf(discount.getType());
+        if (index != -1) {
+            this.appliedDiscounts.remove(index);
+        } else {
+            throw new IllegalArgumentException("No discount of the given type found");
+        }
+    }
+
+    public String getAppliedDiscountsString() {
+        String result = "";
+
+        for (int i = 0; i < this.appliedDiscounts.size(); i++) {
+           result = (i == this.appliedDiscounts.size() - 1)
+            ? result + this.appliedDiscounts.get(i)
+            : result + this.appliedDiscounts.get(i) + ", ";
+        }
+        return result;
     }
 
     public void registerPayment(Payment payment) {

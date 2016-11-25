@@ -48,8 +48,11 @@ public class PlaceholderFunctionalityProvider {
     public static ArrayList<Member> getMemberList() {
         ArrayList<Member> members = new ArrayList<Member>();
 
+        Member memberOne = new Member("Albert", "Taber", new Date(), "2303944734");
+        memberOne.applyDiscount(new SeniorDiscount(0.2));
+        memberOne.applyDiscount(new SeniorDiscount(0.22));
         // Dummy data
-        members.add(new Member("Albert", "Taber", new Date(), "2303944734"));
+        members.add(memberOne);
         members.add(new Member("Leslie", "Shilling", new Date(), "1404936473"));
         members.add(new Member("Nolan", "Blane", new Date(), "0207894235"));
         members.add(new Member("Cassi", "Kleinman", new Date(), "2612786432"));
