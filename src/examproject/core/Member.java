@@ -4,7 +4,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
@@ -15,6 +14,7 @@ public class Member {
     public String preferredActivity;
     public Date dateOfBirth;
     public String cprNumber;
+    public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
     private ArrayList<String> appliedDiscounts = new ArrayList<String>();
     private ArrayList<Double> appliedModifiers = new ArrayList<Double>();
 
@@ -41,6 +41,10 @@ public class Member {
 
     public void registerPayment(Payment payment) {
        this.payments.add(payment);
+    }
+
+    public void registerLapTime(LapTime lapTime) {
+        this.lapTimes.add(lapTime);
     }
 
     public boolean hasPaidThisYear() {

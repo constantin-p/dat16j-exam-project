@@ -1,5 +1,11 @@
 package examproject.cmd;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,8 +61,7 @@ class ScreenManager {
         }
     }
 
-    int showRangeInputView(int min, int max) {
-        System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
+    int rangeInputViewLoop(int min, int max) {
         while (true) {
             if (this.scanner.hasNextInt()) {
                 int input = this.scanner.nextInt();
@@ -75,6 +80,68 @@ class ScreenManager {
         }
     }
 
+    int showRangeInputView(int min, int max) {
+        System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
+        return this.rangeInputViewLoop(min, max);
+    }
+
+    int showRangeInputView(String label, int min, int max) {
+        System.out.println("\n " + label + " [" + min + "-" + max + "]:");
+        return this.rangeInputViewLoop(min, max);
+    }
+
+    String showTimeInputView(String label) {
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+
+        // Minutes (0 - 60)
+        int min = this.showRangeInputView("Enter the minutes", 0, 60);
+
+        // Seconds (0 - 60)
+        int sec = this.showRangeInputView("Enter the seconds", 0, 60);
+
+        String timeString = padLeft(Integer.toString(min), 2, '0') + ":"
+                + padLeft(Integer.toString(sec), 2, '0');
+
+        return timeString;
+    }
+
+    ZonedDateTime showDateInputView(String label) {
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+        while (true) {
+            // Day (1 - 31)
+            int day = this.showRangeInputView("Enter the day", 1, 31);
+
+            // Month (1 - 12)
+            int month = this.showRangeInputView("Enter the month", 1, 12);
+
+            // Year (2000 - 2050)
+            int year = this.showRangeInputView("Enter the year", 2000, 2050);
+
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("dd MM yyyy");
+            String dateString = padLeft(Integer.toString(day), 2, '0') + " "
+                    + padLeft(Integer.toString(month), 2, '0') + " "
+                    + padLeft(Integer.toString(year), 2, '0');
+
+            ZonedDateTime date;
+            boolean endLoop = false;
+            try {
+                LocalDate localDate = LocalDate.parse(dateString, format);
+                date = localDate.atStartOfDay(ZoneId.of("UTC"));
+                System.out.println(day + " " + month + " " + year + "    " + date);
+                endLoop = true;
+            } catch (DateTimeParseException exc) {
+                System.out.println("Error: " + exc.getMessage());
+                continue;
+            }
+            if (endLoop) {
+                return date;
+            }
+        }
+    }
 
     String showStringInputView(String label, int minLength, int maxLength) {
         System.out.println("*--------------------------------------*");
@@ -93,5 +160,10 @@ class ScreenManager {
                 return input;
             }
         }
+    }
+
+
+    private String padLeft(String s, int n, char c) {
+        return String.format("%1$" + n + "s", s).replace(' ', c);
     }
 }
