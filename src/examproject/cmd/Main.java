@@ -218,11 +218,11 @@ public class Main {
         showCoachMemberActions(members.get(selectedMemberIndex));
     }
 
+
     private static void showCoachMemberActions(Member member) {
         ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
         coachMemberActionsMenu.add("Available competitions.");
         coachMemberActionsMenu.add("Members list (back to member list).");
-
         coachMemberActionsMenu.add("Exit (back to coach menu)");
 
         String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
@@ -230,7 +230,9 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // View available competitions
-                System.out.println("Not yet implemented!");
+                Competition selectedCompetition = showCompetitionList(member);
+                selectedCompetition.enterCompetition(member);
+                screenManager.showInfoView("Member <" + member.firstName + " " + member.lastName + "> has been registered to the following competition: " + selectedCompetition.name);
                 break;
             case 1:
                 // Back to member list option
@@ -240,6 +242,20 @@ public class Main {
                 // Back to coach menu
                 showCoachMenu();
         }
+    }
+    private static Competition showCompetitionList(Member member) {
+        ArrayList<Competition> competitions = app.getCompetitions();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for (int i = 0; i < competitions.size(); i++) {
+            Competition  currentCompetition = competitions.get(i);
+            options.add(currentCompetition.name);
+        }
+
+        int selectedCompetitionIndex = screenManager.showOptionsView(" - Competition list - ", options);
+        return competitions.get(selectedCompetitionIndex);
     }
 
 
