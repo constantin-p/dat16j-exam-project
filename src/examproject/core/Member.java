@@ -11,6 +11,7 @@ public class Member {
     public Date dateOfBirth;
     public String cprNumber;
     private ArrayList<String> appliedDiscounts = new ArrayList<String>();
+    public ArrayList<Payment> payments;
 
     public Member(String firstName, String lastName, Date dateOfBirth, String cprNumber) {
         this.firstName = firstName;
@@ -42,5 +43,9 @@ public class Member {
             : result + this.appliedDiscounts.get(i) + ", ";
         }
         return result;
+    }
+
+    public void registerPayment(Payment payment) {
+        this.payments.add(payment);
     }
 }
