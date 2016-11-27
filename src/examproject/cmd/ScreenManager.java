@@ -1,15 +1,12 @@
 package examproject.cmd;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 class ScreenManager {
@@ -20,7 +17,7 @@ class ScreenManager {
         this.scanner = new Scanner(System.in);
     }
 
-    int showOptionsView(String label, ArrayList<String> options) {
+    int showOptionsView(String label, List<String> options) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
@@ -118,13 +115,13 @@ class ScreenManager {
             // Month (1 - 12)
             int month = this.showRangeInputView("Enter the month", 1, 12);
 
-            // Year (2000 - 2050)
-            int year = this.showRangeInputView("Enter the year", 2000, 2050);
+            // Year (1900 - 2050)
+            int year = this.showRangeInputView("Enter the year", 1900, 2050);
 
             DateTimeFormatter format = DateTimeFormatter.ofPattern("dd MM yyyy");
             String dateString = padLeft(Integer.toString(day), 2, '0') + " "
                     + padLeft(Integer.toString(month), 2, '0') + " "
-                    + padLeft(Integer.toString(year), 2, '0');
+                    + Integer.toString(year);
 
             ZonedDateTime date;
             boolean endLoop = false;

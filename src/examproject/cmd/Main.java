@@ -88,8 +88,10 @@ public class Main {
      */
     private static void showTreasurerLogin() {
         while (true) {
-            String username = screenManager.showStringInputView(" - [Treasurer] username: - ", 4, 10);
-            String password = screenManager.showStringInputView(" - [Treasurer] password: - ", 4, 10);
+            String username = screenManager.showStringInputView(" - [Treasurer] username: - ",
+                    4, 10);
+            String password = screenManager.showStringInputView(" - [Treasurer] password: - ",
+                    4, 10);
 
             Response response = app.treasurerSignIn(username, password);
             if (response.success) {
@@ -112,7 +114,7 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // Show members option
-                showMemberList();
+                showTreasurerMemberList();
                 break;
             case 1:
                 // Show members with late payments option
@@ -212,8 +214,8 @@ public class Main {
      */
 
     private static void showCoachMemberList() {
-        ArrayList<Member> members = app.getMembers();
-        ArrayList<String> options = new ArrayList<String>();
+        List<Member> members = app.getMembers();
+        List<String> options = new ArrayList<String>();
 
         // setOptionsView accepts an ArrayList of strings, so
         // loop throw all the members and create a string for the option label
@@ -277,17 +279,46 @@ public class Main {
      *  Member views (Treasurer)
      */
     private static void showMemberNewForm() {
-        String firstName = screenManager.showStringInputView(" - [Chairman] Member first name: - ", 4, 10);
-        String lastName = screenManager.showStringInputView(" - [Chairman] Member last name: - ", 4, 10);
-        String cprNumber = screenManager.showStringInputView(" - [Chairman] Member CPR number: - ", 4, 10);
+        String firstName = screenManager
+                .showStringInputView(" - [Chairman > Add new member] First name: - ",
+                4, 10);
+        String lastName = screenManager
+                .showStringInputView(" - [Chairman > Add new member] Last name: - ",
+                4, 10);
+        String CPRNumber = screenManager
+                .showStringInputView(" - [Chairman > Add new member] CPR number: - ",
+                10, 10);
+        ZonedDateTime dateOfBirth = screenManager
+                .showDateInputView(" - [Chairman > Add new member] Date of birth: - ");
 
-        // ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
-        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.parse("2012-06-10T10:10:10Z[UTC]");
-        // TODO: return validation, member already registered error messages
-        app.addMember(firstName, lastName, new Date(), cprNumber, dateOfRegistrationUTC);
+        // Active | Passive
+        List<String> accountType = new ArrayList<String>();
+        accountType.add("Active.");
+        accountType.add("Passive.");
 
-        screenManager.showInfoView("Member added");
-        showChairmanMenu();
+        boolean isActive = screenManager
+                .showOptionsView(" - [Chairman > Add new member] Status: - ", accountType) == 0;
+
+        boolean isElite = false;
+        if (isActive) {
+            // Elite | Amateur
+            List<String> trainingType = new ArrayList<String>();
+            trainingType.add("Elite.");
+            trainingType.add("Amateur.");
+
+            isElite = screenManager
+                    .showOptionsView(" - [Chairman] Member Training status: - ", trainingType) == 0;
+        }
+
+        Response response = app.addMember(firstName, lastName, CPRNumber, dateOfBirth,
+                ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite);
+        if (response.success) {
+            screenManager.showInfoView("Member added!");
+            showChairmanMenu();
+        } else {
+            screenManager.showInfoView("Error! " + response.info);
+            showChairmanMenu();
+        }
     }
 
     private static void showMemberTimeForm(Member member) {
@@ -329,28 +360,30 @@ public class Main {
 
 
 
-    private static void showMemberList() {
-        ArrayList<Member> members = app.getMembers();
-        ArrayList<String> options = new ArrayList<String>();
+    private static void showTreasurerMemberList() {
+        List<Member> members = app.getMembers();
+        List<String> options = new ArrayList<String>();
 
         // setOptionsView accepts an ArrayList of strings, so
         // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            String currentMemberDicounts = currentMember.getAppliedDiscountsString();
+            String currentMemberDiscounts = currentMember.getAppliedDiscountsString();
 
-            if(Objects.equals(currentMemberDicounts, "")) {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " No discounts applied for this account.");
+            if(Objects.equals(currentMemberDiscounts, "")) {
+                options.add(currentMember.firstName + " " + currentMember.lastName
+                        + " " + currentMember.CPRNumber + " No discounts applied for this account.");
             } else {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " discounts: " + currentMemberDicounts);
+                options.add(currentMember.firstName + " " + currentMember.lastName
+                        + " " + currentMember.CPRNumber + " discounts: " + currentMemberDiscounts);
             }
         }
 
-        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
-        showMemberActions(members.get(selectedMemberIndex));
+        int selectedMemberIndex = screenManager.showOptionsView(" - [Treasurer] Member list - ", options);
+        showTreasurerMemberActions(members.get(selectedMemberIndex));
     }
 
-    private static void showMemberActions(Member member) {
+    private static void showTreasurerMemberActions(Member member) {
         ArrayList<String> memberActionsMenu = new ArrayList<String>();
         ArrayList<String> disabledMemberActionsMenu = new ArrayList<String>();
 
@@ -376,7 +409,7 @@ public class Main {
         memberActionsMenu.add("Members list (back to member list).");
 
 
-        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
+        String viewLabel = " - [Treasurer > Member actions menu ] <" + member.firstName + " " + member.lastName + "> - ";
         int selectedOption = screenManager.showOptionsView(viewLabel, disabledMemberActionsMenu, memberActionsMenu);
         switch (selectedOption) {
 
@@ -387,7 +420,7 @@ public class Main {
                 } else {
                     // Show payment option
                     if (member.hasPaidThisYear()) {
-                        showMemberList();
+                        showTreasurerMemberList();
                     } else {
                         showPaymentActions(member);
                     }
@@ -399,18 +432,18 @@ public class Main {
 
                 if (discountsAvailable) {
                     if (member.hasPaidThisYear()) {
-                        showMemberActions(member); // loop
+                        showTreasurerMemberActions(member); // loop
                     } else {
                         showPaymentActions(member);
                     }
                 } else {
                     // Show payment option
-                    showMemberList();
+                    showTreasurerMemberList();
                 }
                 break;
             case 2:
                 // Back to member list option
-                showMemberList();
+                showTreasurerMemberList();
                 break;
         }
     }
@@ -428,18 +461,18 @@ public class Main {
                 // Accept (pay fee) option
                 member.registerPayment(new Payment(feeValue, "Member fee", ZonedDateTime.now(ZoneOffset.UTC)));
                 screenManager.showInfoView("Payment registered!");
-                showMemberActions(member);
+                showTreasurerMemberActions(member);
                 break;
             case 1:
                 // Decline (back to member actions menu) option
-                showMemberActions(member);
+                showTreasurerMemberActions(member);
                 break;
         }
     }
 
 
     private static void showMembersWithLatePayments() {
-        ArrayList<Member> members = app.getMembers();
+        List<Member> members = app.getMembers();
         ArrayList<String> options = new ArrayList<String>();
 
         // setOptionsView accepts an ArrayList of strings, so
@@ -457,7 +490,7 @@ public class Main {
         }
 
         int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
-        showMemberActions(members.get(selectedMemberIndex));
+        showTreasurerMemberActions(members.get(selectedMemberIndex));
     }
     /*
      *  Discount views
@@ -486,6 +519,6 @@ public class Main {
         member.applyDiscount(discounts.get(selectedDiscount));
         member.applyDiscount(discounts.get(selectedDiscount));
         screenManager.showInfoView("Discount applied!");
-        showMemberActions(member);
+        showTreasurerMemberActions(member);
     }
 }

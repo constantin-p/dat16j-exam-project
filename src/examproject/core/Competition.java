@@ -22,7 +22,7 @@ public class Competition implements Storable {
 
     /*
      *  DB integration
-    */
+     */
     @Override
     public HashMap<String, String> deconstruct() {
         HashMap<String, String> values = new HashMap<String, String>();
