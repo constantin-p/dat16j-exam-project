@@ -69,8 +69,48 @@ public class TableHandler {
         return null;
     }
 
+    public List<HashMap<String, String>> getAll(HashMap<String, String> query) {
+
+        // Update the cached column values if the file was modified outside our code
+        if (!this.isSyncedWithFile()) {
+            this.syncTableColumns();
+        }
+
+        // Check the query for invalid keys
+        for (Map.Entry<String, String> querySet : query.entrySet()) {
+            if (!this.cachedColumnValues.contains(querySet.getKey())) {
+                throw new IllegalArgumentException("Invalid query key [" + querySet.getKey()
+                        + "]! No column with the given name.");
+            }
+        }
+
+        try (Stream<String> stream = Files.lines(this.filePath, StandardCharsets.UTF_8)) {
+            List<HashMap<String, String>> lines = stream
+                    .map( line -> {
+                        return this.mapRowValues(line);
+                    })
+                    .filter( rowValueMap -> {
+                        if (rowValueMap != null) {
+                            for (Map.Entry<String, String> querySet : query.entrySet()) {
+                                if (!rowValueMap.get(querySet.getKey()).equals(querySet.getValue())) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+
+            return lines;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public List<HashMap<String, String>> getAll() {
-        ArrayList<HashMap<String, String>> rows = new ArrayList<HashMap<String, String>>();
+        List<HashMap<String, String>> rows = new ArrayList<HashMap<String, String>>();
 
         // Update the cached column values if the file was modified outside our code
         if (!this.isSyncedWithFile()) {

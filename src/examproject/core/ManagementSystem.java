@@ -113,7 +113,6 @@ public class ManagementSystem {
     }
 
 
-
 //    protected Member updateMember(String username, String password) {
 //        // placeholder functionality -> getMember(...id);
 //        // ?id
@@ -237,7 +236,7 @@ public class ManagementSystem {
         try {
             Database.getTable("chairmen")
                     .insert(new Chairman("chairman", "chairman").deconstruct());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -257,7 +256,7 @@ public class ManagementSystem {
         try {
             Database.getTable("treasurers")
                     .insert(new Treasurer("treasurer", "treasurer").deconstruct());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -279,7 +278,7 @@ public class ManagementSystem {
             table.insert(new Coach("coach1", "coach1").deconstruct());
             table.insert(new Coach("coach2", "coach2").deconstruct());
             table.insert(new Coach("coach3", "coach3").deconstruct());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -299,7 +298,7 @@ public class ManagementSystem {
         try {
             Database.getTable("discounts")
                     .insert(new SeniorDiscount(0.25).deconstruct());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -323,7 +322,7 @@ public class ManagementSystem {
             table.insert(new Discipline("BACKSTROKE_200").deconstruct());
             table.insert(new Discipline("BUTTERFLY_100").deconstruct());
             table.insert(new Discipline("BUTTERFLY_200").deconstruct());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -353,7 +352,7 @@ public class ManagementSystem {
             table.insert(new Competition("Last one alive wins",
                     disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
 
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -370,23 +369,11 @@ public class ManagementSystem {
             columns.add("is_active");
             columns.add("is_elite");
             Database.createTable("members", columns);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
 
-    private void createPaymentsTable() {
-        // Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("amount");
-            columns.add("details");
-            columns.add("payment_date");
-            Database.createTable("payments", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /*
      *  Helpers

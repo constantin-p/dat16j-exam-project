@@ -425,7 +425,6 @@ public class Main {
                         showPaymentActions(member);
                     }
                 }
-
                 break;
             case 1:
                 // Show payment option
@@ -504,7 +503,7 @@ public class Main {
         // loop throw all the discounts and create a string for the option label
         for (int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
-            System.out.println(member.hasDiscount(currentDiscount));
+//            System.out.println(member.hasDiscount(currentDiscount));
             if (!member.hasDiscount(currentDiscount)) {
                 options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
             } else {
@@ -514,7 +513,7 @@ public class Main {
         }
 
         int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
-        System.out.println(selectedDiscount);
+//        System.out.println(selectedDiscount);
         // TODO: apply the discount (save it to the selected member)
         member.applyDiscount(discounts.get(selectedDiscount));
         member.applyDiscount(discounts.get(selectedDiscount));

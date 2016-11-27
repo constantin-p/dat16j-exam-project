@@ -9,12 +9,12 @@ public class Payment implements Storable {
 
     private double amount;
     private String details;
-    public ZonedDateTime paymentDate;
+    public ZonedDateTime date;
 
-    public Payment(double amount, String details, ZonedDateTime paymentDate) {
+    public Payment(double amount, String details, ZonedDateTime date) {
         this.amount = amount;
         this.details = details;
-        this.paymentDate = paymentDate;
+        this.date = date;
     }
 
     /*
@@ -26,7 +26,7 @@ public class Payment implements Storable {
 
         values.put("amount", Double.toString(this.amount));
         values.put("details", this.details);
-        values.put("payment_date", this.paymentDate.toString());
+        values.put("date", this.date.toString());
 
         return values;
     }
@@ -34,10 +34,10 @@ public class Payment implements Storable {
     public static Payment construct(HashMap<String, String> valuesMap) {
         String amount = valuesMap.get("amount");
         String details = valuesMap.get("details");
-        String paymentDate = valuesMap.get("payment_date");
+        String date = valuesMap.get("date");
 
         return new Payment(Double.parseDouble(amount),
-                details, ZonedDateTime.parse(paymentDate));
+                details, ZonedDateTime.parse(date));
     }
 
     // For debugging
@@ -46,6 +46,6 @@ public class Payment implements Storable {
         return this.getClass().getCanonicalName()
                 + "[amount: " + this.amount
                 + ", details: " + this.details
-                + ", paymentDate: " + this.paymentDate + "]";
+                + ", date: " + this.date + "]";
     }
 }

@@ -1,14 +1,13 @@
 package examproject.core;
 
+import examproject.db.Database;
 import examproject.db.Storable;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 
@@ -29,8 +28,6 @@ public class Member implements Storable {
     public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
     private ArrayList<String> appliedDiscounts = new ArrayList<String>();
     private ArrayList<Double> appliedModifiers = new ArrayList<Double>();
-
-    public ArrayList<Payment> payments = new ArrayList<Payment>();
 
     public Member(String firstName, String lastName, String CPRNumber,
                   ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
@@ -56,18 +53,15 @@ public class Member implements Storable {
         return fee;
     }
 
-    public void registerPayment(Payment payment) {
-       this.payments.add(payment);
-    }
-
-    public void registerLapTime(LapTime lapTime) {
-        this.lapTimes.add(lapTime);
-    }
-
+    /*
+     *  Payment
+     */
     public boolean hasPaidThisYear() {
-        int currentYear = Integer.parseInt(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy")));
-        for(int j = 0; j < this.payments.size(); j++) {
-            if(Integer.parseInt(this.payments.get(j).paymentDate.format(DateTimeFormatter.ofPattern("yyyy"))) == currentYear) {
+        int currentYear = ZonedDateTime.now(ZoneOffset.UTC).getYear();
+        List<Payment> payments = this.getPayments();
+
+        for(int j = 0; j < payments.size(); j++) {
+            if(payments.get(j).date.getYear() == currentYear) {
                 return true;
             }
         }
@@ -75,13 +69,15 @@ public class Member implements Storable {
     }
 
     public Response hasLatePayment() {
-        int startYear = Integer.parseInt(this.dateOfRegistration.format(DateTimeFormatter.ofPattern("yyyy")));
-        int currentYear = Integer.parseInt(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy")));
-        System.out.println(startYear + " " + currentYear);
+        int startYear = this.dateOfRegistration.getYear();
+        int currentYear = ZonedDateTime.now(ZoneOffset.UTC).getYear();
+
+        List<Payment> payments = this.getPayments();
+
         for(int i = startYear; i < currentYear; i++) {
             boolean found = false;
-            for(int j = 0; j < this.payments.size(); j++) {
-                if(Integer.parseInt(this.payments.get(j).paymentDate.format(DateTimeFormatter.ofPattern("yyyy"))) == i) {
+            for(int j = 0; j < payments.size(); j++) {
+                if(payments.get(j).date.getYear() == i) {
                     found = true;
                     break;
                 }
@@ -92,6 +88,82 @@ public class Member implements Storable {
         }
         return new Response(false);
     }
+
+    public void registerPayment(Payment payment) {
+        try {
+            Database.getTable("payments").insert(payment.deconstruct());
+            registerPaymentToMember(payment);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and insert the payment
+            this.createPaymentsTable();
+            Database.getTable("payments").insert(payment.deconstruct());
+            registerPaymentToMember(payment);
+        }
+    }
+
+    private void registerPaymentToMember(Payment payment) {
+        HashMap<String, String> memberPaymentJunction = new HashMap<String, String>();
+        memberPaymentJunction.put("member_cpr_number", this.CPRNumber);
+        memberPaymentJunction.put("payment_date", payment.date.toString());
+
+        try {
+            Database.getTable("member_payment").insert(memberPaymentJunction);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and insert the payment_member entry
+            this.createPaymentMemberTable();
+            Database.getTable("member_payment").insert(memberPaymentJunction);
+        }
+    }
+
+    private List<Payment> getPayments() {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("member_cpr_number", this.CPRNumber);
+
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("member_payment").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            this.createPaymentMemberTable();
+            entries = Database.getTable("member_payment").getAll(searchQuery);
+        }
+
+        List<Payment> payments = new ArrayList<Payment>();
+        for (HashMap<String, String> entry : entries) {
+            HashMap<String, String> paymentSearchQuery = new HashMap<String, String>();
+            paymentSearchQuery.put("date", entry.get("payment_date"));
+
+            payments.addAll(getPaymentsFromQuery(paymentSearchQuery));
+        }
+
+        return payments;
+    }
+
+    private List<Payment> getPaymentsFromQuery(HashMap<String, String> searchQuery) {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("payments").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            this.createPaymentsTable();
+            entries = Database.getTable("payments").getAll(searchQuery);
+        }
+
+        List<Payment> payments = new ArrayList<Payment>();
+        for (HashMap<String, String> entry : entries) {
+            payments.add(Payment.construct(entry));
+        }
+
+        return payments;
+    }
+
+
+
+
+    public void registerLapTime(LapTime lapTime) {
+        this.lapTimes.add(lapTime);
+    }
+
 
 
 
@@ -114,7 +186,7 @@ public class Member implements Storable {
 
     public boolean hasDiscount(Discount discount) {
         for (int i = 0; i < this.appliedDiscounts.size(); i++) {
-            if (Objects.equals(this.appliedDiscounts.get(i), discount.getType())) {
+            if (this.appliedDiscounts.get(i).equals(discount.getType())) {
                 return true;
             }
         }
@@ -143,6 +215,33 @@ public class Member implements Storable {
         return 500.0;
     }
 
+     /*
+      *  DB Tables
+      */
+     private void createPaymentMemberTable() {
+         // Create the table
+         try {
+             List<String> columns = new ArrayList<String>();
+             columns.add("member_cpr_number");
+             columns.add("payment_date");
+             Database.createTable("member_payment", columns);
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
+
+    private void createPaymentsTable() {
+        // Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("amount");
+            columns.add("details");
+            columns.add("date");
+            Database.createTable("payments", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /*
      *  DB integration

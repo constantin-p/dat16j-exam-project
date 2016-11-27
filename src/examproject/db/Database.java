@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Database {
-    private static final String TABLE_NAME_REGEXP = "[A-Za-z0-9-]+";
+    private static final String TABLE_NAME_REGEXP = "[A-Za-z0-9-_]+";
     private static final String TABLE_FILENAME_EXTENSION = ".csv";
     private static final String DB_FOLDER = "_db";
 
@@ -57,7 +57,7 @@ public class Database {
      */
     private static void validateTableName(String name) {
         if (!name.matches(TABLE_NAME_REGEXP)) {
-            throw new IllegalArgumentException("Invalid name! The name string can contain only alphanumeric chars and dashes (-).");
+            throw new IllegalArgumentException("Invalid name! The name string can contain only alphanumeric chars, dashes and underscore (-_).");
         }
     }
 }
