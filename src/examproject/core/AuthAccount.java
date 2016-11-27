@@ -27,7 +27,7 @@ public class AuthAccount implements Storable {
         return values;
     }
 
-    public static Storable construct(HashMap<String, String> valuesMap) {
+    public static AuthAccount construct(HashMap<String, String> valuesMap) {
         String username = valuesMap.get("username");
         String password = valuesMap.get("password");
 

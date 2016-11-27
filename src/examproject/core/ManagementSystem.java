@@ -21,7 +21,6 @@ public class ManagementSystem {
     private Treasurer currentTreasurer;
     private Coach currentCoach;
 
-    private List<Discount> discounts = new ArrayList<Discount>();
     private ArrayList<Competition> competitions = new ArrayList<Competition>();
 
     private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
@@ -34,7 +33,6 @@ public class ManagementSystem {
         ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
         System.out.println(utc + "  " + utc.getYear() + " " + utc.format(format));
         this.placeholderFunctionalityProvider = new PlaceholderFunctionalityProvider();
-        this.discounts.add(new SeniorDiscount(0.25));
 
 
         this.disciplines.add(new Discipline("Freestyle 100"));
@@ -168,7 +166,23 @@ public class ManagementSystem {
     }
 
     public List<Discount> getDiscounts() {
-        return this.discounts;
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("discounts").getAll();
+        } catch(IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            this.createDiscountsTable();
+            entries = Database.getTable("discounts").getAll();
+        }
+
+        List<Discount> discounts = new ArrayList<Discount>();
+        for (HashMap<String, String> entry : entries) {
+            if (entry.get("type").equals(SeniorDiscount.TYPE)) {
+                discounts.add(SeniorDiscount.construct(entry));
+            }
+        }
+
+        return discounts;
     }
 
     public ArrayList<Discipline> getDisciplines() {
@@ -237,6 +251,26 @@ public class ManagementSystem {
         try {
             Database.getTable("coaches")
                     .insert(new Coach("coach", "coach").deconstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createDiscountsTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("modifier");
+            columns.add("type");
+            Database.createTable("discounts", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded chairman entry
+        try {
+            Database.getTable("discounts")
+                    .insert(new SeniorDiscount(0.25).deconstruct());
         } catch (Exception e) {
             e.printStackTrace();
         }

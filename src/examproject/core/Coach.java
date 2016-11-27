@@ -10,7 +10,7 @@ public class Coach extends AuthAccount {
         super(username, password);
     }
 
-    public static Storable construct(HashMap<String, String> valuesMap) {
+    public static Coach construct(HashMap<String, String> valuesMap) {
         String username = valuesMap.get("username");
         String password = valuesMap.get("password");
 

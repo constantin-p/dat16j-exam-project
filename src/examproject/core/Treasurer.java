@@ -10,7 +10,7 @@ public class Treasurer extends AuthAccount {
         super(username, password);
     }
 
-    public static Storable construct(HashMap<String, String> valuesMap) {
+    public static Treasurer construct(HashMap<String, String> valuesMap) {
         String username = valuesMap.get("username");
         String password = valuesMap.get("password");
 

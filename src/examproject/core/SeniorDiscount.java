@@ -1,23 +1,55 @@
 package examproject.core;
 
-public class SeniorDiscount implements Discount {
+import examproject.db.Storable;
 
-    private double percent;
+import java.util.HashMap;
 
-    public SeniorDiscount(double percent) {
-        this.percent = percent;
+public class SeniorDiscount implements Discount, Storable {
+
+    private double modifier;
+    public static final String TYPE = "SENIOR_DISCOUNT";
+
+    public SeniorDiscount(double modifier) {
+        this.modifier = modifier;
     }
 
     public double getModifier() {
-        return this.percent;
+        return this.modifier;
     }
 
     public String getType() {
-        return "Senior Discount";
+        return TYPE;
     }
 
     //TODO Use date to check condition if over 60
     public boolean checkCondition(Member member) {
         return true;
+    }
+
+    /*
+     *  DB integration
+    */
+    @Override
+    public HashMap<String, String> deconstruct() {
+        HashMap<String, String> values = new HashMap<String, String>();
+
+        values.put("modifier", Double.toString(this.getModifier()));
+        values.put("type", this.getType());
+
+        return values;
+    }
+
+    public static SeniorDiscount construct(HashMap<String, String> valuesMap) {
+        String percent = valuesMap.get("modifier");
+
+        return new SeniorDiscount(Double.parseDouble(percent));
+    }
+
+    // For debugging
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName()
+                + "[modifier: " + this.getModifier()
+                + ", type: " + this.getType() + "]";
     }
 }
