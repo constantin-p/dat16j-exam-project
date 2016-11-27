@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ManagementSystem {
 
@@ -204,8 +205,22 @@ public class ManagementSystem {
         return disciplines;
     }
 
-    public ArrayList<Competition> getCompetitions() {
-        return this.competitions;
+    public List<Competition> getCompetitions() {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("competitions").getAll();
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            this.createCompetitionsTable();
+            entries = Database.getTable("competitions").getAll();
+        }
+
+        List<Competition> competitions = new ArrayList<Competition>();
+        for (HashMap<String, String> entry : entries) {
+            competitions.add(Competition.construct(entry));
+        }
+
+        return competitions;
     }
 
 
@@ -318,4 +333,41 @@ public class ManagementSystem {
         }
     }
 
+    private void createCompetitionsTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("name");
+            columns.add("discipline_name");
+            Database.createTable("competitions", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded competition entries
+        try {
+            TableHandler table = Database.getTable("competitions");
+            List<Discipline> disciplines = this.getDisciplines();
+
+            table.insert(new Competition("World Aquatics",
+                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("Duel in the Pool",
+                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("Back it up",
+                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("Last one alive wins",
+                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*
+     *  Helpers
+     */
+    private int getRandom(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
 }

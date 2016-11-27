@@ -258,14 +258,14 @@ public class Main {
         }
     }
     private static Competition showCompetitionList(Member member) {
-        ArrayList<Competition> competitions = app.getCompetitions();
+        List<Competition> competitions = app.getCompetitions();
         ArrayList<String> options = new ArrayList<String>();
 
         // setOptionsView accepts an ArrayList of strings, so
         // loop throw all the members and create a string for the option label
         for (int i = 0; i < competitions.size(); i++) {
             Competition  currentCompetition = competitions.get(i);
-            options.add(currentCompetition.name);
+            options.add(currentCompetition.name + " " + currentCompetition.discipline.name);
         }
 
         int selectedCompetitionIndex = screenManager.showOptionsView(" - Competition list - ", options);
