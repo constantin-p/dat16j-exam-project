@@ -24,10 +24,7 @@ public class Member implements Storable {
     public boolean isActive;
     public boolean isElite;
 
-
     public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
-    private ArrayList<String> appliedDiscounts = new ArrayList<String>();
-    private ArrayList<Double> appliedModifiers = new ArrayList<Double>();
 
     public Member(String firstName, String lastName, String CPRNumber,
                   ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
@@ -43,14 +40,29 @@ public class Member implements Storable {
         this.isElite = isElite;
     }
 
+    /*
+     *  Fee calculation
+     */
     public double calculateFee() {
         double fee = this.getBaseFee();
 
+        List<Discount> discounts = this.getDiscounts();
+
         // deduct the discounts
-        for (int i = 0; i < this.appliedModifiers.size(); i++) {
-            fee = fee - (fee * this.appliedModifiers.get(i));
+        for (int i = 0; i < discounts.size(); i++) {
+            fee = fee - (fee * discounts.get(i).getModifier());
         }
         return fee;
+    }
+
+    private double getBaseFee() {
+        if (this.isActive) {
+            if (YEARS.between(this.dateOfBirth, ZonedDateTime.now(ZoneOffset.UTC)) >= 18) {
+                return 1600.0;
+            }
+            return 1000.0;
+        }
+        return 500.0;
     }
 
     /*
@@ -95,7 +107,7 @@ public class Member implements Storable {
             registerPaymentToMember(payment);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and insert the payment
-            this.createPaymentsTable();
+            DBTables.createPaymentsTable();
             Database.getTable("payments").insert(payment.deconstruct());
             registerPaymentToMember(payment);
         }
@@ -110,7 +122,7 @@ public class Member implements Storable {
             Database.getTable("member_payment").insert(memberPaymentJunction);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and insert the payment_member entry
-            this.createPaymentMemberTable();
+            DBTables.createPaymentMemberTable();
             Database.getTable("member_payment").insert(memberPaymentJunction);
         }
     }
@@ -124,7 +136,7 @@ public class Member implements Storable {
             entries = Database.getTable("member_payment").getAll(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createPaymentMemberTable();
+            DBTables.createPaymentMemberTable();
             entries = Database.getTable("member_payment").getAll(searchQuery);
         }
 
@@ -145,7 +157,7 @@ public class Member implements Storable {
             entries = Database.getTable("payments").getAll(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createPaymentsTable();
+            DBTables.createPaymentsTable();
             entries = Database.getTable("payments").getAll(searchQuery);
         }
 
@@ -158,6 +170,81 @@ public class Member implements Storable {
     }
 
 
+    /*
+     *  Discount
+     */
+    public boolean hasDiscount(Discount discount) {
+        List<Discount> discounts = this.getDiscounts();
+        for (int i = 0; i < discounts.size(); i++) {
+            if (discounts.get(i).getType().equals(discount.getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void registerDiscount(Discount discount) {
+        // The discount already exists so create the juction with the member entry
+        this.registerDiscountToMember(discount);
+    }
+
+    private void registerDiscountToMember(Discount discount) {
+        HashMap<String, String> memberDiscountJunction = new HashMap<String, String>();
+        memberDiscountJunction.put("member_cpr_number", this.CPRNumber);
+        memberDiscountJunction.put("discount_type", discount.getType());
+
+        try {
+            Database.getTable("member_discount").insert(memberDiscountJunction);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and insert the payment_member entry
+            DBTables.createPaymentMemberTable();
+            Database.getTable("member_discount").insert(memberDiscountJunction);
+        }
+    }
+
+    private List<Discount> getDiscounts() {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("member_cpr_number", this.CPRNumber);
+
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("member_discount").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createDiscountMemberTable();
+            entries = Database.getTable("member_discount").getAll(searchQuery);
+        }
+
+        List<Discount> discounts = new ArrayList<Discount>();
+        for (HashMap<String, String> entry : entries) {
+            HashMap<String, String> discountSearchQuery = new HashMap<String, String>();
+            discountSearchQuery.put("type", entry.get("discount_type"));
+
+            discounts.addAll(getDiscountsFromQuery(discountSearchQuery));
+        }
+
+        return discounts;
+    }
+
+    private List<Discount> getDiscountsFromQuery(HashMap<String, String> searchQuery) {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("discounts").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createDiscountsTable();
+            entries = Database.getTable("discounts").getAll(searchQuery);
+        }
+
+        List<Discount> discounts = new ArrayList<Discount>();
+        for (HashMap<String, String> entry : entries) {
+            if (entry.get("type").equals(SeniorDiscount.TYPE)) {
+                discounts.add(SeniorDiscount.construct(entry));
+            }
+        }
+
+        return discounts;
+    }
 
 
     public void registerLapTime(LapTime lapTime) {
@@ -165,83 +252,6 @@ public class Member implements Storable {
     }
 
 
-
-
-    public void applyDiscount(Discount discount) {
-        this.appliedDiscounts.add(discount.getType());
-        this.appliedModifiers.add(discount.getModifier());
-
-    }
-
-    public void removeDiscount(Discount discount) {
-        int index = this.appliedDiscounts.indexOf(discount.getType());
-        if (index != -1) {
-            this.appliedDiscounts.remove(index);
-            this.appliedModifiers.remove(index);
-
-        } else {
-            throw new IllegalArgumentException("No discount of the given type found");
-        }
-    }
-
-    public boolean hasDiscount(Discount discount) {
-        for (int i = 0; i < this.appliedDiscounts.size(); i++) {
-            if (this.appliedDiscounts.get(i).equals(discount.getType())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public String getAppliedDiscountsString() {
-        String result = "";
-
-        for (int i = 0; i < this.appliedDiscounts.size(); i++) {
-           result = (i == this.appliedDiscounts.size() - 1)
-            ? result + this.appliedDiscounts.get(i)
-            : result + this.appliedDiscounts.get(i) + ", ";
-        }
-        return result;
-    }
-
-
-    private double getBaseFee() {
-        if (this.isActive) {
-            if (YEARS.between(this.dateOfBirth, ZonedDateTime.now(ZoneOffset.UTC)) >= 18) {
-                return 1600.0;
-            }
-            return 1000.0;
-        }
-        return 500.0;
-    }
-
-     /*
-      *  DB Tables
-      */
-     private void createPaymentMemberTable() {
-         // Create the table
-         try {
-             List<String> columns = new ArrayList<String>();
-             columns.add("member_cpr_number");
-             columns.add("payment_date");
-             Database.createTable("member_payment", columns);
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     }
-
-    private void createPaymentsTable() {
-        // Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("amount");
-            columns.add("details");
-            columns.add("date");
-            Database.createTable("payments", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /*
      *  DB integration

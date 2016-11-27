@@ -1,6 +1,8 @@
 package examproject.core;
 
-public interface Discount {
+import examproject.db.Storable;
+
+public interface Discount extends Storable {
 
     public double getModifier();
     public boolean checkCondition(Member member);

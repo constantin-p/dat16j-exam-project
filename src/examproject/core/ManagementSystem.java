@@ -29,7 +29,7 @@ public class ManagementSystem {
         try {
             entry = Database.getTable("chairmen").get(searchQuery);
         } catch (IllegalArgumentException e) {
-            this.createChairmenTable();
+            DBTables.createChairmenTable();
             entry = Database.getTable("chairmen").get(searchQuery);
         }
 
@@ -54,7 +54,7 @@ public class ManagementSystem {
             entry = Database.getTable("treasurers").get(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createTreasurersTable();
+            DBTables.createTreasurersTable();
             entry = Database.getTable("treasurers").get(searchQuery);
         }
 
@@ -79,7 +79,7 @@ public class ManagementSystem {
             entry = Database.getTable("coaches").get(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createCoachesTable();
+            DBTables.createCoachesTable();
             entry = Database.getTable("coaches").get(searchQuery);
         }
 
@@ -126,7 +126,7 @@ public class ManagementSystem {
             entries = Database.getTable("members").getAll();
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createDiscountsTable();
+            DBTables.createMembersTable();
             entries = Database.getTable("members").getAll();
         }
 
@@ -144,7 +144,7 @@ public class ManagementSystem {
             entries = Database.getTable("discounts").getAll();
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createDiscountsTable();
+            DBTables.createDiscountsTable();
             entries = Database.getTable("discounts").getAll();
         }
 
@@ -164,7 +164,7 @@ public class ManagementSystem {
             entries = Database.getTable("disciplines").getAll();
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createDisciplinesTable();
+            DBTables.createDisciplinesTable();
             entries = Database.getTable("disciplines").getAll();
         }
 
@@ -182,7 +182,7 @@ public class ManagementSystem {
             entries = Database.getTable("competitions").getAll();
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createCompetitionsTable();
+            DBTables.createCompetitionsTable(this.getDisciplines());
             entries = Database.getTable("competitions").getAll();
         }
 
@@ -206,7 +206,7 @@ public class ManagementSystem {
             entry = Database.getTable("members").get(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
-            this.createMembersTable();
+            DBTables.createMembersTable();
             entry = Database.getTable("members").get(searchQuery);
         }
 
@@ -215,170 +215,5 @@ public class ManagementSystem {
         }
 
         return Member.construct(entry);
-    }
-
-
-    /*
-     *  DB Tables
-     */
-    private void createChairmenTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("username");
-            columns.add("password");
-            Database.createTable("chairmen", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded chairman entry
-        try {
-            Database.getTable("chairmen")
-                    .insert(new Chairman("chairman", "chairman").deconstruct());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createTreasurersTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("username");
-            columns.add("password");
-            Database.createTable("treasurers", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded treasurer entry
-        try {
-            Database.getTable("treasurers")
-                    .insert(new Treasurer("treasurer", "treasurer").deconstruct());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createCoachesTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("username");
-            columns.add("password");
-            Database.createTable("coaches", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded coach entries
-        try {
-            TableHandler table = Database.getTable("coaches");
-            table.insert(new Coach("coach1", "coach1").deconstruct());
-            table.insert(new Coach("coach2", "coach2").deconstruct());
-            table.insert(new Coach("coach3", "coach3").deconstruct());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createDiscountsTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("modifier");
-            columns.add("type");
-            Database.createTable("discounts", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded discount entry
-        try {
-            Database.getTable("discounts")
-                    .insert(new SeniorDiscount(0.25).deconstruct());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createDisciplinesTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("name");
-            Database.createTable("disciplines", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded discipline entries
-        try {
-            TableHandler table = Database.getTable("disciplines");
-            table.insert(new Discipline("FREESTYLE_100").deconstruct());
-            table.insert(new Discipline("FREESTYLE_200").deconstruct());
-            table.insert(new Discipline("BACKSTROKE_100").deconstruct());
-            table.insert(new Discipline("BACKSTROKE_200").deconstruct());
-            table.insert(new Discipline("BUTTERFLY_100").deconstruct());
-            table.insert(new Discipline("BUTTERFLY_200").deconstruct());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createCompetitionsTable() {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("name");
-            columns.add("discipline_name");
-            Database.createTable("competitions", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded competition entries
-        try {
-            TableHandler table = Database.getTable("competitions");
-            List<Discipline> disciplines = this.getDisciplines();
-
-            table.insert(new Competition("World Aquatics",
-                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Duel in the Pool",
-                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Back it up",
-                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Last one alive wins",
-                    disciplines.get(getRandom(0, disciplines.size() - 1))).deconstruct());
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createMembersTable() {
-        // Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("first_name");
-            columns.add("last_name");
-            columns.add("cpr_number");
-            columns.add("date_of_birth");
-            columns.add("date_of_registration");
-            columns.add("is_active");
-            columns.add("is_elite");
-            Database.createTable("members", columns);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /*
-     *  Helpers
-     */
-    private int getRandom(int min, int max) {
-        return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 }

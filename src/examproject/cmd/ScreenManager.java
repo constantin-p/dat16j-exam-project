@@ -48,16 +48,6 @@ class ScreenManager {
         System.out.println("\n" + label + "\n");
     }
 
-    // TODO: use showOptionsView
-    void showInfoView(String label, ArrayList data) {
-        System.out.println("*--------------------------------------*");
-        System.out.println("\n" + label + "\n");
-
-        for (int i = 0; i < data.size(); i++) {
-            System.out.println(" [" + (i + 1) + "]   " + data.get(i));
-        }
-    }
-
     int rangeInputViewLoop(int min, int max) {
         while (true) {
             if (this.scanner.hasNextInt()) {
@@ -159,7 +149,9 @@ class ScreenManager {
         }
     }
 
-
+    /*
+     *  Helpers
+     */
     private String padLeft(String s, int n, char c) {
         return String.format("%1$" + n + "s", s).replace(' ', c);
     }

@@ -368,7 +368,7 @@ public class Main {
         // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            String currentMemberDiscounts = currentMember.getAppliedDiscountsString();
+            String currentMemberDiscounts = "";
 
             if(Objects.equals(currentMemberDiscounts, "")) {
                 options.add(currentMember.firstName + " " + currentMember.lastName
@@ -390,6 +390,7 @@ public class Main {
         List<Discount> discounts = app.getDiscounts();
         boolean discountsAvailable = false;
         for(int i = 0; i < discounts.size(); i++) {
+            System.out.println("DISCOUNT EQUAL" + member.hasDiscount(discounts.get(i)));
             if(!member.hasDiscount(discounts.get(i))) {
                 discountsAvailable = true;
                 break;
@@ -416,7 +417,7 @@ public class Main {
             case 0:
                 // Show discount option
                 if (discountsAvailable) {
-                    showDiscountList(member);
+                    showTreasurerDiscountList(member);
                 } else {
                     // Show payment option
                     if (member.hasPaidThisYear()) {
@@ -494,29 +495,26 @@ public class Main {
     /*
      *  Discount views
      */
-    private static void showDiscountList(Member member) {
+    private static void showTreasurerDiscountList(Member member) {
         List<Discount> discounts = app.getDiscounts();
         ArrayList<String> options = new ArrayList<String>();
 
-        // TODO: show enabled discounts and add as an option only the available ones
+        // TODO: REFACTOR show enabled discounts and add as an option only the available ones
         // setOptionsView accepts an ArrayList of strings, so
         // loop throw all the discounts and create a string for the option label
         for (int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
-//            System.out.println(member.hasDiscount(currentDiscount));
             if (!member.hasDiscount(currentDiscount)) {
-                options.add("<" + currentDiscount.getType() + ">  modifier: " + (currentDiscount.getModifier() * 100) + "%.");
+                options.add("<" + currentDiscount.getType() + ">  modifier: "
+                        + (currentDiscount.getModifier() * 100) + "%.");
             } else {
                 discounts.remove(i);
                 i--;
             }
         }
 
-        int selectedDiscount = screenManager.showOptionsView(" - Discount list - ", options);
-//        System.out.println(selectedDiscount);
-        // TODO: apply the discount (save it to the selected member)
-        member.applyDiscount(discounts.get(selectedDiscount));
-        member.applyDiscount(discounts.get(selectedDiscount));
+        int selectedDiscount = screenManager.showOptionsView(" - [Treasurer] Discount list - ", options);
+        member.registerDiscount(discounts.get(selectedDiscount));
         screenManager.showInfoView("Discount applied!");
         showTreasurerMemberActions(member);
     }
