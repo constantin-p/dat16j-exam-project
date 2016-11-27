@@ -13,7 +13,7 @@ public class CSVFileHandler {
 
     public static void writeLine(Writer writer, List<String> values) throws IOException {
         boolean isFirstValue = true;
-
+        System.out.print(values);
         for (String value : values) {
             // Write the value separator
             if (!isFirstValue) {

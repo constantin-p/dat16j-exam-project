@@ -53,12 +53,12 @@ public class Main {
             String username = screenManager.showStringInputView(" - [Chairman] username: - ", 4, 10);
             String password = screenManager.showStringInputView(" - [Chairman] password: - ", 4, 10);
 
-            boolean okStatus = app.chairmanSignIn(username, password);
-            if (okStatus) {
+            Response response = app.chairmanSignIn(username, password);
+            if (response.success) {
                 showChairmanMenu();
                 return;
             } else {
-                screenManager.showInfoView("Log in error!");
+                screenManager.showInfoView("Log in error! " + response.info);
             }
         }
     }
@@ -447,7 +447,7 @@ public class Main {
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
             Response hasLatePayment = currentMember.hasLatePayment();
-            if(hasLatePayment.status) {
+            if(hasLatePayment.success) {
                 options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " late for: " + hasLatePayment.info);
 
             } else {

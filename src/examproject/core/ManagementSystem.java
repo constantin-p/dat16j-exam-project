@@ -1,5 +1,9 @@
 package examproject.core;
 
+import examproject.db.Database;
+import examproject.db.Storable;
+import examproject.db.TableHandler;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
@@ -24,6 +28,35 @@ public class ManagementSystem {
     private HashMap<String, Discipline> disciplineMap = new HashMap();
 
     public ManagementSystem() {
+
+//        Chairman chairman = new Chairman("chairman", "chairman");
+//        List<Storable> dataRows = new ArrayList<Storable>();
+//        dataRows.add(chairman);
+
+//        try {
+//            List<String> columns = new ArrayList<String>();
+//            columns.add("username");
+//            columns.add("password");
+//            Database.createTable("chairmen", columns);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        try {
+//            Database.getTable("chairmen")
+//                    .insert(chairman.deconstruct());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        try {
+//            Database.getTable("chairmen")
+//                    .getAll();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
         // TODO: remove
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/mm/yyyy");
         ZonedDateTime utc = ZonedDateTime.now(ZoneOffset.UTC);
@@ -52,18 +85,21 @@ public class ManagementSystem {
     }
 
     /*
-     *  Chairman functionatily
+     *  Chairman functionality
      */
     // TODO: use response codes instead of boolean
-    public boolean chairmanSignIn(String username, String password) {
-        try {
-            this.currentChairman = this.placeholderFunctionalityProvider.getChairman(username, password);
-        } catch(IllegalArgumentException e) {
-            // TODO: Send the error message
-            // System.out.println(e.getMessage());
-            return false;
+    public Response chairmanSignIn(String username, String password) {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("username", username);
+        searchQuery.put("password", password);
+
+        HashMap<String, String> entry = Database.getTable("chairmen").get(searchQuery);
+        if (entry == null) {
+            return new Response(false, "Wrong username/password.");
         }
-        return true;
+
+        this.currentChairman = (Chairman) Chairman.construct(entry);
+        return new Response(true);
     }
 
     /*
@@ -106,7 +142,7 @@ public class ManagementSystem {
         }
         Member member = new Member(firstName, lastName, dateOfBirth, cprNumber, dateOfRegistration);
         // member.registerPayment(new Payment(1005.0, "Membership fee", ZonedDateTime.now(ZoneOffset.UTC)));
-        System.out.println(member.hasLatePayment().status + " " + member.hasLatePayment().info);
+        System.out.println(member.hasLatePayment().success + " " + member.hasLatePayment().info);
         this.placeholderFunctionalityProvider.setMember(member);
 
         return true;
