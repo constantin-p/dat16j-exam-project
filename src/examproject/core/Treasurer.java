@@ -1,29 +1,19 @@
 package examproject.core;
 
-public class Treasurer {
+import examproject.db.Storable;
 
-    private String username;
-    private String password;
+import java.util.HashMap;
 
-    public Treasurer(String username, String password) {
-        this.username = username;
-        this.password = password;
+public class Treasurer extends AuthAccount {
+
+    public Treasurer (String username, String password) {
+        super(username, password);
     }
 
-    public String getUsername() {
-        return username;
-    }
+    public static Storable construct(HashMap<String, String> valuesMap) {
+        String username = valuesMap.get("username");
+        String password = valuesMap.get("password");
 
-    public String getPassword() {
-        return password;
-    }
-
-    //TODO: add member as arg
-    public void  applyDiscount(double x) {
-
-    }
-
-    public void showMemberWithLatePayments() {
-
+        return new Treasurer(username, password);
     }
 }

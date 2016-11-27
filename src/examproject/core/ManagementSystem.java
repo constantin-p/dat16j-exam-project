@@ -19,43 +19,15 @@ public class ManagementSystem {
     private PlaceholderFunctionalityProvider placeholderFunctionalityProvider;
     private Chairman currentChairman;
     private Treasurer currentTreasurer;
-    private List<Discount> discounts = new ArrayList<Discount>();
+    private Coach currentCoach;
 
+    private List<Discount> discounts = new ArrayList<Discount>();
     private ArrayList<Competition> competitions = new ArrayList<Competition>();
 
-    private Coach currentCoach;
     private ArrayList<Discipline> disciplines = new ArrayList<Discipline>();
     private HashMap<String, Discipline> disciplineMap = new HashMap();
 
     public ManagementSystem() {
-
-//        Chairman chairman = new Chairman("chairman", "chairman");
-//        List<Storable> dataRows = new ArrayList<Storable>();
-//        dataRows.add(chairman);
-
-//        try {
-//            List<String> columns = new ArrayList<String>();
-//            columns.add("username");
-//            columns.add("password");
-//            Database.createTable("chairmen", columns);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-//        try {
-//            Database.getTable("chairmen")
-//                    .insert(chairman.deconstruct());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-//        try {
-//            Database.getTable("chairmen")
-//                    .getAll();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
 
         // TODO: remove
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/mm/yyyy");
@@ -87,13 +59,19 @@ public class ManagementSystem {
     /*
      *  Chairman functionality
      */
-    // TODO: use response codes instead of boolean
     public Response chairmanSignIn(String username, String password) {
         HashMap<String, String> searchQuery = new HashMap<String, String>();
         searchQuery.put("username", username);
         searchQuery.put("password", password);
 
-        HashMap<String, String> entry = Database.getTable("chairmen").get(searchQuery);
+        HashMap<String, String> entry;
+        try {
+            entry = Database.getTable("chairmen").get(searchQuery);
+        } catch(IllegalArgumentException e) {
+            this.createChairmenTable();
+            entry = Database.getTable("chairmen").get(searchQuery);
+        }
+
         if (entry == null) {
             return new Response(false, "Wrong username/password.");
         }
@@ -105,29 +83,51 @@ public class ManagementSystem {
     /*
      *  Treasurer Functionality
      */
-    // TODO: use response codes instead of boolean
-    public boolean treasurerSignIn(String username, String password) {
+    public Response treasurerSignIn(String username, String password) {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("username", username);
+        searchQuery.put("password", password);
+
+        HashMap<String, String> entry;
         try {
-            this.currentTreasurer = this.placeholderFunctionalityProvider.getTreasurer(username, password);
+            entry = Database.getTable("treasurers").get(searchQuery);
         } catch(IllegalArgumentException e) {
-            // TODO: Send the error message
-            return false;
+            // No table with the given name was found, create the table and search again
+            this.createTreasurersTable();
+            entry = Database.getTable("treasurers").get(searchQuery);
         }
-        return true;
+
+        if (entry == null) {
+            return new Response(false, "Wrong username/password.");
+        }
+
+        this.currentTreasurer = (Treasurer) Treasurer.construct(entry);
+        return new Response(true);
     }
 
     /*
      *  Coach Functionality
      */
-    // TODO: use response codes instead of boolean
-    public boolean coachSignIn(String username, String password) {
+    public Response coachSignIn(String username, String password) {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("username", username);
+        searchQuery.put("password", password);
+
+        HashMap<String, String> entry;
         try {
-            this.currentCoach = this.placeholderFunctionalityProvider.getCoach(username, password);
+            entry = Database.getTable("coaches").get(searchQuery);
         } catch(IllegalArgumentException e) {
-            // TODO: Send the error message
-            return false;
+            // No table with the given name was found, create the table and search again
+            this.createCoachesTable();
+            entry = Database.getTable("coaches").get(searchQuery);
         }
-        return true;
+
+        if (entry == null) {
+            return new Response(false, "Wrong username/password.");
+        }
+
+        this.currentCoach = (Coach) Coach.construct(entry);
+        return new Response(true);
     }
     /*
      *  Member functionality
@@ -178,5 +178,68 @@ public class ManagementSystem {
         return this.competitions;
     }
 
+
+    /*
+     *  DB Tables
+     */
+    private void createChairmenTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("username");
+            columns.add("password");
+            Database.createTable("chairmen", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded chairman entry
+        try {
+            Database.getTable("chairmen")
+                    .insert(new Chairman("chairman", "chairman").deconstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createTreasurersTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("username");
+            columns.add("password");
+            Database.createTable("treasurers", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded chairman entry
+        try {
+            Database.getTable("treasurers")
+                    .insert(new Treasurer("treasurer", "treasurer").deconstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createCoachesTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("username");
+            columns.add("password");
+            Database.createTable("coaches", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded chairman entry
+        try {
+            Database.getTable("coaches")
+                    .insert(new Coach("coach", "coach").deconstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 

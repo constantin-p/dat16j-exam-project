@@ -18,12 +18,9 @@ public class Database {
 
         String tableFilename = name + TABLE_FILENAME_EXTENSION;
 
-        System.out.println("FILE SEARCH" + Files.exists(Paths.get(DB_FOLDER)) +  Paths.get(DB_FOLDER));
         if (!Files.exists(Paths.get(DB_FOLDER))) {
-            System.out.println("FILE NOT HERE");
             try {
                 Files.createDirectories(Paths.get(DB_FOLDER));
-                System.out.println("CREATE FILE");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -33,11 +30,11 @@ public class Database {
         try (BufferedWriter bWriter = Files.newBufferedWriter(Paths.get(DB_FOLDER, tableFilename),
                 StandardCharsets.UTF_8)) {
             CSVFileHandler.writeLine(bWriter, columnNames);
-            return new TableHandler(Paths.get(DB_FOLDER, tableFilename));
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
+        return new TableHandler(Paths.get(DB_FOLDER, tableFilename));
     }
 
     public static TableHandler getTable(String name) {

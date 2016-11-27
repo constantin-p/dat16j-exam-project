@@ -1,19 +1,22 @@
 package examproject.core;
 
+import examproject.db.Storable;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 
-public class Member {
+public class Member implements Storable {
 
     public String firstName;
     public String lastName;
     public String preferredActivity;
     public Date dateOfBirth;
-    public String cprNumber;
+    public String CPRNumber;
     public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
     private ArrayList<String> appliedDiscounts = new ArrayList<String>();
     private ArrayList<Double> appliedModifiers = new ArrayList<Double>();
@@ -22,11 +25,11 @@ public class Member {
     public ZonedDateTime dateOfRegistration;
     public ArrayList<Payment> payments = new ArrayList<Payment>();
 
-    public Member(String firstName, String lastName, Date dateOfBirth, String cprNumber, ZonedDateTime dateOfRegistration) {
+    public Member(String firstName, String lastName, Date dateOfBirth, String CPRNumber, ZonedDateTime dateOfRegistration) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-        this.cprNumber = cprNumber;
+        this.CPRNumber = CPRNumber;
         this.dateOfRegistration = dateOfRegistration;
     }
 
@@ -113,5 +116,44 @@ public class Member {
             : result + this.appliedDiscounts.get(i) + ", ";
         }
         return result;
+    }
+
+
+
+
+
+    /*
+ *  DB integration
+ */
+    @Override
+    public HashMap<String, String> deconstruct() {
+        HashMap<String, String> values = new HashMap<String, String>();
+
+        values.put("firstName", this.firstName);
+        values.put("lastName", this.lastName);
+        values.put("dateOfBirth", this.dateOfBirth.toString());
+        values.put("lastName", this.lastName);
+        values.put("lastName", this.lastName);
+
+        return values;
+    }
+
+//    public static Storable construct(HashMap<String, String> valuesMap) {
+//        String firstName = valuesMap.get("firstName");
+//        String lastName = valuesMap.get("lastName");
+//
+//        return new Member(firstName, lastName);
+//    }
+
+    // For debugging
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName()
+                + "[username: " + this.firstName
+                + ", password: " + this.lastName
+                + ", preferredActivity: " + this.preferredActivity
+                + ", dateOfBirth: " + this.dateOfBirth
+                + ", CPRNumber: " + this.CPRNumber
+                + ", dateOfRegistration: " + this.dateOfRegistration + "]";
     }
 }

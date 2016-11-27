@@ -1,12 +1,19 @@
 package examproject.core;
 
-public class Coach {
+import examproject.db.Storable;
 
-    private  String username;
-    private  String password;
+import java.util.HashMap;
+
+public class Coach extends AuthAccount {
 
     public Coach (String username, String password) {
-        this.username = username;
-        this.password = password;
+        super(username, password);
+    }
+
+    public static Storable construct(HashMap<String, String> valuesMap) {
+        String username = valuesMap.get("username");
+        String password = valuesMap.get("password");
+
+        return new Coach(username, password);
     }
 }

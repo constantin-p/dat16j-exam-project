@@ -91,12 +91,12 @@ public class Main {
             String username = screenManager.showStringInputView(" - [Treasurer] username: - ", 4, 10);
             String password = screenManager.showStringInputView(" - [Treasurer] password: - ", 4, 10);
 
-            boolean okStatus = app.treasurerSignIn(username, password);
-            if (okStatus) {
+            Response response = app.treasurerSignIn(username, password);
+            if (response.success) {
                 showTreasurerMenu();
                 return;
             } else {
-                screenManager.showInfoView("Log in error");
+                screenManager.showInfoView("Log in error! " + response.info);
             }
         }
     }
@@ -133,12 +133,12 @@ public class Main {
             String username = screenManager.showStringInputView(" - [Coach] username: - ", 4, 10);
             String password = screenManager.showStringInputView(" - [Coach] password: - ", 4, 10);
 
-            boolean okStatus = app.coachSignIn(username, password);
-            if (okStatus) {
+            Response response = app.coachSignIn(username, password);
+            if (response.success) {
                 showCoachMenu();
                 return;
             } else {
-                screenManager.showInfoView("Log in error!");
+                screenManager.showInfoView("Log in error! " + response.info);
             }
         }
     }
@@ -219,7 +219,7 @@ public class Main {
         // loop throw all the members and create a string for the option label
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
-            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber);
         }
 
         int selectedMemberIndex = screenManager.showOptionsView(" - Coach Member list - ", options);
@@ -340,9 +340,9 @@ public class Main {
             String currentMemberDicounts = currentMember.getAppliedDiscountsString();
 
             if(Objects.equals(currentMemberDicounts, "")) {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " No discounts applied for this account.");
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " No discounts applied for this account.");
             } else {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " discounts: " + currentMemberDicounts);
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " discounts: " + currentMemberDicounts);
             }
         }
 
@@ -448,7 +448,7 @@ public class Main {
             Member currentMember = members.get(i);
             Response hasLatePayment = currentMember.hasLatePayment();
             if(hasLatePayment.success) {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.cprNumber + " late for: " + hasLatePayment.info);
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " late for: " + hasLatePayment.info);
 
             } else {
                 members.remove(i);
