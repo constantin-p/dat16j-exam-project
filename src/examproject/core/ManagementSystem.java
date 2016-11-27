@@ -65,7 +65,7 @@ public class ManagementSystem {
         HashMap<String, String> entry;
         try {
             entry = Database.getTable("chairmen").get(searchQuery);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             this.createChairmenTable();
             entry = Database.getTable("chairmen").get(searchQuery);
         }
@@ -89,7 +89,7 @@ public class ManagementSystem {
         HashMap<String, String> entry;
         try {
             entry = Database.getTable("treasurers").get(searchQuery);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
             this.createTreasurersTable();
             entry = Database.getTable("treasurers").get(searchQuery);
@@ -114,7 +114,7 @@ public class ManagementSystem {
         HashMap<String, String> entry;
         try {
             entry = Database.getTable("coaches").get(searchQuery);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
             this.createCoachesTable();
             entry = Database.getTable("coaches").get(searchQuery);
@@ -127,6 +127,7 @@ public class ManagementSystem {
         this.currentCoach = (Coach) Coach.construct(entry);
         return new Response(true);
     }
+
     /*
      *  Member functionality
      */
@@ -135,7 +136,7 @@ public class ManagementSystem {
         // 1. check for duplicate   placeholder functionality -> getMember(...data);
         // 2. if unique, add the new member, error otherwise
         boolean hasMember = this.placeholderFunctionalityProvider.getMember(cprNumber);
-        if(hasMember) {
+        if (hasMember) {
             return false;
         }
         Member member = new Member(firstName, lastName, dateOfBirth, cprNumber, dateOfRegistration);
@@ -169,7 +170,7 @@ public class ManagementSystem {
         List<HashMap<String, String>> entries;
         try {
             entries = Database.getTable("discounts").getAll();
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
             this.createDiscountsTable();
             entries = Database.getTable("discounts").getAll();
@@ -185,10 +186,25 @@ public class ManagementSystem {
         return discounts;
     }
 
-    public ArrayList<Discipline> getDisciplines() {
-        return this.disciplines;
+    public List<Discipline> getDisciplines() {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("disciplines").getAll();
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            this.createDisciplinesTable();
+            entries = Database.getTable("disciplines").getAll();
+        }
+
+        List<Discipline> disciplines = new ArrayList<Discipline>();
+        for (HashMap<String, String> entry : entries) {
+            disciplines.add(Discipline.construct(entry));
+        }
+
+        return disciplines;
     }
-    public ArrayList<Competition> getCompetitions(){
+
+    public ArrayList<Competition> getCompetitions() {
         return this.competitions;
     }
 
@@ -227,7 +243,7 @@ public class ManagementSystem {
             e.printStackTrace();
         }
 
-        // 2. Add the hardcoded chairman entry
+        // 2. Add the hardcoded treasurer entry
         try {
             Database.getTable("treasurers")
                     .insert(new Treasurer("treasurer", "treasurer").deconstruct());
@@ -247,10 +263,12 @@ public class ManagementSystem {
             e.printStackTrace();
         }
 
-        // 2. Add the hardcoded chairman entry
+        // 2. Add the hardcoded coach entries
         try {
-            Database.getTable("coaches")
-                    .insert(new Coach("coach", "coach").deconstruct());
+            TableHandler table = Database.getTable("coaches");
+            table.insert(new Coach("coach1", "coach1").deconstruct());
+            table.insert(new Coach("coach2", "coach2").deconstruct());
+            table.insert(new Coach("coach3", "coach3").deconstruct());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -267,7 +285,7 @@ public class ManagementSystem {
             e.printStackTrace();
         }
 
-        // 2. Add the hardcoded chairman entry
+        // 2. Add the hardcoded discount entry
         try {
             Database.getTable("discounts")
                     .insert(new SeniorDiscount(0.25).deconstruct());
@@ -275,5 +293,29 @@ public class ManagementSystem {
             e.printStackTrace();
         }
     }
-}
 
+    private void createDisciplinesTable() {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("name");
+            Database.createTable("disciplines", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded discipline entries
+        try {
+            TableHandler table = Database.getTable("disciplines");
+            table.insert(new Discipline("FREESTYLE_100").deconstruct());
+            table.insert(new Discipline("FREESTYLE_200").deconstruct());
+            table.insert(new Discipline("BACKSTROKE_100").deconstruct());
+            table.insert(new Discipline("BACKSTROKE_200").deconstruct());
+            table.insert(new Discipline("BUTTERFLY_100").deconstruct());
+            table.insert(new Discipline("BUTTERFLY_200").deconstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}

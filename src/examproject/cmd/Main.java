@@ -174,7 +174,7 @@ public class Main {
      *  Discipline views
      */
     private static void showDisciplineList() {
-        ArrayList<Discipline> disciplines = app.getDisciplines();
+        List<Discipline> disciplines = app.getDisciplines();
         ArrayList<String> options = new ArrayList<String>();
 
         // setOptionsView accepts an ArrayList of strings, so
@@ -189,22 +189,22 @@ public class Main {
 //        showDisciplineLeaderboard(disciplines.get(selectedDisciplineIndex));
     }
 
-    private static void showDisciplineLeaderboard(Discipline discipline) {
-        ArrayList<Member> leaderboardScores = discipline.getLeaderboard().getScores();
-        ArrayList<String> options = new ArrayList<String>();
-
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the members and create a string for the option label
-        for(int i = 0; i < leaderboardScores.size(); i++) {
-            Member currentParticipant = leaderboardScores.get(i);
-            options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
-        }
-
-
-        String viewLabel = " - <" + discipline.name + "> leaderboard - ";
-        screenManager.showInfoView(viewLabel, options);
-    }
-
+//    private static void showDisciplineLeaderboard(Discipline discipline) {
+//        ArrayList<Member> leaderboardScores = discipline.getLeaderboard().getScores();
+//        ArrayList<String> options = new ArrayList<String>();
+//
+//        // setOptionsView accepts an ArrayList of strings, so
+//        // loop throw all the members and create a string for the option label
+//        for(int i = 0; i < leaderboardScores.size(); i++) {
+//            Member currentParticipant = leaderboardScores.get(i);
+//            options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
+//        }
+//
+//
+//        String viewLabel = " - <" + discipline.name + "> leaderboard - ";
+//        screenManager.showInfoView(viewLabel, options);
+//    }
+//
 
 
     /*

@@ -79,7 +79,8 @@ public class TableHandler {
 
         try (Stream<String> stream = Files.lines(this.filePath, StandardCharsets.UTF_8)) {
 
-            stream.forEach(line -> {
+            stream.skip(1)
+                    .forEach(line -> {
                 HashMap<String, String> rowValueMap = this.mapRowValues(line);
                 if (rowValueMap != null) {
                     rows.add(rowValueMap);
