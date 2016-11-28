@@ -1,11 +1,15 @@
 package examproject.cmd;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 class ScreenManager {
 
@@ -78,21 +82,17 @@ class ScreenManager {
         return this.rangeInputViewLoop(min, max);
     }
 
-    String showTimeInputView(String label) {
+    LocalTime showTimeInputView(String label) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
-
         // Minutes (0 - 60)
-        int min = this.showRangeInputView("Enter the minutes", 0, 60);
+        int min = this.showRangeInputView("Enter the minutes", 0, 59);
 
         // Seconds (0 - 60)
-        int sec = this.showRangeInputView("Enter the seconds", 0, 60);
+        int sec = this.showRangeInputView("Enter the seconds", 0, 59);
 
-        String timeString = padLeft(Integer.toString(min), 2, '0') + ":"
-                + padLeft(Integer.toString(sec), 2, '0');
-
-        return timeString;
+        return LocalTime.of(0, min, sec);
     }
 
     ZonedDateTime showDateInputView(String label) {

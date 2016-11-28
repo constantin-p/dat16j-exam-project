@@ -2,6 +2,7 @@ package examproject.core;
 
 import examproject.db.Database;
 
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ public class ManagementSystem {
         this.currentChairman = Chairman.construct(entry);
         return new Response(true);
     }
+
 
     /*
      *  Treasurer Functionality
@@ -93,9 +95,6 @@ public class ManagementSystem {
     }
 
 
-    /*
-     *  Member functionality
-     */
     public Response addMember(String firstName, String lastName, String CPRNumber,
                              ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
                              boolean isActive, boolean isElite, Discipline preferredDiscipline,
@@ -106,7 +105,7 @@ public class ManagementSystem {
             return new Response(false, "Member already registered.");
         }
 
-        // Create the member and add it to the databasse
+        // Create the member and add it to the database
         Member member = new Member(firstName, lastName, CPRNumber, dateOfBirth,
                 dateOfRegistration, isActive, isElite, preferredDiscipline);
 
@@ -208,6 +207,34 @@ public class ManagementSystem {
         }
 
         return competitions;
+    }
+
+    public Leaderboard getLeaderboard(Discipline discipline) {
+        Leaderboard leaderboard = new Leaderboard(discipline);
+
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("discipline_name", discipline.name);
+
+
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("members").getAll();
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createMembersTable();
+            entries = Database.getTable("members").getAll();
+        }
+
+        for (HashMap<String, String> entry : entries) {
+            Member member = Member.construct(entry);
+            List<LapTime> lapTimesForMember = member.getLapTimes();
+
+            for (LapTime lapTime : lapTimesForMember) {
+                leaderboard.addResult(member, lapTime);
+            }
+        }
+
+        return leaderboard;
     }
 
     /*

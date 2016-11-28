@@ -98,35 +98,6 @@ public class DBTables {
         }
     }
 
-    static void createCompetitionsTable(List<Discipline> disciplines) {
-        // 1. Create the table
-        try {
-            List<String> columns = new ArrayList<String>();
-            columns.add("name");
-            columns.add("discipline_name");
-            Database.createTable("competitions", columns);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // 2. Add the hardcoded competition entries
-        try {
-            TableHandler table = Database.getTable("competitions");
-
-            table.insert(new Competition("WORLD_AQUATICS",
-                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("DUEL_IN_THE_POOL",
-                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("BACK_IT_UP",
-                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("LAST_ONE_ALIVE_WINS",
-                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
     static void createMembersTable() {
         // Create the table
         try {
@@ -221,6 +192,61 @@ public class DBTables {
             columns.add("member_cpr_number");
             columns.add("competition_name");
             Database.createTable("member_competition", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void createCompetitionsTable(List<Discipline> disciplines) {
+        // 1. Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("name");
+            columns.add("discipline_name");
+            Database.createTable("competitions", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Add the hardcoded competition entries
+        try {
+            TableHandler table = Database.getTable("competitions");
+
+            table.insert(new Competition("WORLD_AQUATICS",
+                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("DUEL_IN_THE_POOL",
+                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("BACK_IT_UP",
+                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
+            table.insert(new Competition("LAST_ONE_ALIVE_WINS",
+                    disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void createLapTimeMemberTable() {
+        // Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("member_cpr_number");
+            columns.add("laptime_id");
+            Database.createTable("member_laptime", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void createLapTimesTable() {
+        // Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("time");
+            columns.add("date");
+            columns.add("id");
+            columns.add("type");
+            Database.createTable("laptimes", columns);
         } catch (Exception e) {
             e.printStackTrace();
         }

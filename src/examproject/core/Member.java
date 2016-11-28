@@ -250,13 +250,76 @@ public class Member implements Storable {
     }
 
 
-
-    // TODO: refactor
+    /*
+     *  Lap times
+     */
     public void registerLapTime(LapTime lapTime) {
-        this.lapTimes.add(lapTime);
+        try {
+            Database.getTable("laptimes").insert(lapTime.deconstruct());
+            registerLapTimeToMember(lapTime);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and insert the lapTime
+            DBTables.createLapTimesTable();
+            Database.getTable("laptimes").insert(lapTime.deconstruct());
+            registerLapTimeToMember(lapTime);
+        }
     }
 
+    private void registerLapTimeToMember(LapTime lapTime) {
+        HashMap<String, String> memberLapTimeJunction = new HashMap<String, String>();
+        memberLapTimeJunction.put("member_cpr_number", this.CPRNumber);
+        memberLapTimeJunction.put("laptime_id", lapTime.ID);
 
+        try {
+            Database.getTable("member_laptime").insert(memberLapTimeJunction);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and insert the member_laptime entry
+            DBTables.createLapTimeMemberTable();
+            Database.getTable("member_laptime").insert(memberLapTimeJunction);
+        }
+    }
+
+    public List<LapTime> getLapTimes() {
+        HashMap<String, String> searchQuery = new HashMap<String, String>();
+        searchQuery.put("member_cpr_number", this.CPRNumber);
+
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("member_laptime").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createLapTimeMemberTable();
+            entries = Database.getTable("member_laptime").getAll(searchQuery);
+        }
+
+        List<LapTime> lapTimes = new ArrayList<LapTime>();
+        for (HashMap<String, String> entry : entries) {
+            HashMap<String, String> lapTimeSearchQuery = new HashMap<String, String>();
+            lapTimeSearchQuery.put("id", entry.get("laptime_id"));
+
+            lapTimes.addAll(getLapTimesFromQuery(lapTimeSearchQuery));
+        }
+
+        return lapTimes;
+    }
+
+    private List<LapTime> getLapTimesFromQuery(HashMap<String, String> searchQuery) {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("laptimes").getAll(searchQuery);
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createLapTimesTable();
+            entries = Database.getTable("laptimes").getAll(searchQuery);
+        }
+
+        List<LapTime> lapTimes = new ArrayList<LapTime>();
+        for (HashMap<String, String> entry : entries) {
+            lapTimes.add(LapTime.construct(entry));
+        }
+
+        return lapTimes;
+    }
 
     /*
      *  DB integration
