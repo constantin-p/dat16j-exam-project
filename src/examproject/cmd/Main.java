@@ -70,7 +70,7 @@ public class Main {
         switch (selectedOption) {
             case 0:
                 // Add new member option
-                showMemberNewForm();
+                showChairmanNewMemberForm();
                 break;
             case 1:
                 // Back to main menu option
@@ -79,6 +79,53 @@ public class Main {
         }
     }
 
+    private static void showChairmanNewMemberForm() {
+        String firstName = screenManager
+                .showStringInputView(" - [Chairman > Add new member] First name: - ",
+                        4, 10);
+        String lastName = screenManager
+                .showStringInputView(" - [Chairman > Add new member] Last name: - ",
+                        4, 10);
+        String CPRNumber = screenManager
+                .showStringInputView(" - [Chairman > Add new member] CPR number: - ",
+                        10, 10);
+        ZonedDateTime dateOfBirth = screenManager
+                .showDateInputView(" - [Chairman > Add new member] Date of birth: - ");
+
+        // Active | Passive
+        List<String> accountType = new ArrayList<String>();
+        accountType.add("Active.");
+        accountType.add("Passive.");
+
+        boolean isActive = screenManager
+                .showOptionsView(" - [Chairman > Add new member] Status: - ", accountType) == 0;
+
+        boolean isElite = false;
+        if (isActive) {
+            // Elite | Amateur (only for active members)
+            List<String> trainingType = new ArrayList<String>();
+            trainingType.add("Elite.");
+            trainingType.add("Amateur.");
+
+            isElite = screenManager
+                    .showOptionsView(" - [Chairman] Member Training status: - ", trainingType) == 0;
+        }
+
+        // Preferred discipline
+        List<Discipline> disciplines = app.getDisciplines();
+
+        Discipline preferredDiscipline = showDisciplineList("[Chairman > Add new member] ");
+
+        Response response = app.addMember(firstName, lastName, CPRNumber, dateOfBirth,
+                ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite, preferredDiscipline);
+        if (response.success) {
+            screenManager.showInfoView("Member added!");
+            showChairmanMenu();
+        } else {
+            screenManager.showInfoView("Error! " + response.info);
+            showChairmanMenu();
+        }
+    }
 
     /*
      *  Treasurer views
@@ -124,6 +171,7 @@ public class Main {
         }
     }
 
+
     /*
      * Coach views
      */
@@ -159,7 +207,7 @@ public class Main {
             case 1:
                 // View leaderboards option
                 // TODO display array ofleaderboards for different disciplines of members assigned to coach
-                showDisciplineList();
+                showCoachDisciplineList();
                 break;
             case 2:
                 // Back to main menu option
@@ -172,7 +220,7 @@ public class Main {
     /*
      *  Discipline views
      */
-    private static void showDisciplineList() {
+    private static void showCoachDisciplineList() {
         List<Discipline> disciplines = app.getDisciplines();
         ArrayList<String> options = new ArrayList<String>();
 
@@ -275,48 +323,6 @@ public class Main {
     /*
      *  Member views (Treasurer)
      */
-    private static void showMemberNewForm() {
-        String firstName = screenManager
-                .showStringInputView(" - [Chairman > Add new member] First name: - ",
-                4, 10);
-        String lastName = screenManager
-                .showStringInputView(" - [Chairman > Add new member] Last name: - ",
-                4, 10);
-        String CPRNumber = screenManager
-                .showStringInputView(" - [Chairman > Add new member] CPR number: - ",
-                10, 10);
-        ZonedDateTime dateOfBirth = screenManager
-                .showDateInputView(" - [Chairman > Add new member] Date of birth: - ");
-
-        // Active | Passive
-        List<String> accountType = new ArrayList<String>();
-        accountType.add("Active.");
-        accountType.add("Passive.");
-
-        boolean isActive = screenManager
-                .showOptionsView(" - [Chairman > Add new member] Status: - ", accountType) == 0;
-
-        boolean isElite = false;
-        if (isActive) {
-            // Elite | Amateur
-            List<String> trainingType = new ArrayList<String>();
-            trainingType.add("Elite.");
-            trainingType.add("Amateur.");
-
-            isElite = screenManager
-                    .showOptionsView(" - [Chairman] Member Training status: - ", trainingType) == 0;
-        }
-
-        Response response = app.addMember(firstName, lastName, CPRNumber, dateOfBirth,
-                ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite);
-        if (response.success) {
-            screenManager.showInfoView("Member added!");
-            showChairmanMenu();
-        } else {
-            screenManager.showInfoView("Error! " + response.info);
-            showChairmanMenu();
-        }
-    }
 
     private static void showMemberTimeForm(Member member) {
         String time = screenManager.showTimeInputView(" - [Register time] Time: - ");
@@ -516,5 +522,26 @@ public class Main {
         member.registerDiscount(discounts.get(selectedDiscount));
         screenManager.showInfoView("Discount applied!");
         showTreasurerMemberActions(member);
+    }
+
+
+
+    /*
+     *  Helpers
+     */
+    private static Discipline showDisciplineList(String labelPrefix) {
+        List<Discipline> disciplines = app.getDisciplines();
+        List<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < disciplines.size(); i++) {
+            Discipline currentDiscipline = disciplines.get(i);
+            options.add(currentDiscipline.name);
+        }
+
+        int selectedDisciplineIndex = screenManager.showOptionsView(" - "
+                + labelPrefix + "Discipline list - ", options);
+        return disciplines.get(selectedDisciplineIndex);
     }
 }

@@ -20,15 +20,17 @@ public class Member implements Storable {
     public ZonedDateTime dateOfBirth;
     public ZonedDateTime dateOfRegistration;
 
-    public Discipline preferredDiscipline;
     public boolean isActive;
     public boolean isElite;
+
+    public Discipline preferredDiscipline;
+
 
     public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
 
     public Member(String firstName, String lastName, String CPRNumber,
                   ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
-                  boolean isActive, boolean isElite) {
+                  boolean isActive, boolean isElite, Discipline preferredDiscipline) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.CPRNumber = CPRNumber;
@@ -38,6 +40,8 @@ public class Member implements Storable {
 
         this.isActive = isActive;
         this.isElite = isElite;
+
+        this.preferredDiscipline = preferredDiscipline;
     }
 
     /*
@@ -270,6 +274,8 @@ public class Member implements Storable {
         values.put("is_active", Boolean.toString(this.isActive));
         values.put("is_elite", Boolean.toString(this.isElite));
 
+        values.put("discipline_name", this.preferredDiscipline.name);
+
         return values;
     }
 
@@ -284,9 +290,11 @@ public class Member implements Storable {
         String isActive = valuesMap.get("is_active");
         String isElite = valuesMap.get("is_elite");
 
+        String prefferedDiscipline = valuesMap.get("discipline_name");
+
         return new Member(firstName, lastName, CPRNumber,
                 ZonedDateTime.parse(dateOfBirth), ZonedDateTime.parse(dateOfRegistration),
-                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isElite));
+                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isElite), new Discipline(prefferedDiscipline));
     }
 
     // For debugging

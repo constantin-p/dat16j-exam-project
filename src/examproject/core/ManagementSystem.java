@@ -96,7 +96,7 @@ public class ManagementSystem {
      */
     public Response addMember(String firstName, String lastName, String CPRNumber,
                              ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
-                             boolean isActive, boolean isElite) {
+                             boolean isActive, boolean isElite, Discipline preferredDiscipline) {
 
         // Check for duplicate
         if (this.getMember(CPRNumber) != null) {
@@ -105,7 +105,7 @@ public class ManagementSystem {
 
         // Create the member and add it to the databasse
         Member member = new Member(firstName, lastName, CPRNumber, dateOfBirth,
-                dateOfRegistration, isActive, isElite);
+                dateOfRegistration, isActive, isElite, preferredDiscipline);
 
         Database.getTable("members").insert(member.deconstruct());
 

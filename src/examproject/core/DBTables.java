@@ -138,6 +138,7 @@ public class DBTables {
             columns.add("date_of_registration");
             columns.add("is_active");
             columns.add("is_elite");
+            columns.add("discipline_name");
             Database.createTable("members", columns);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
