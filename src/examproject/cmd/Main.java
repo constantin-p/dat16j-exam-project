@@ -4,10 +4,7 @@ import examproject.core.*;
 
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Main {
 
@@ -384,34 +381,36 @@ public class Main {
     }
 
     private static void showTreasurerMemberActions(Member member) {
-        ArrayList<String> memberActionsMenu = new ArrayList<String>();
-        ArrayList<String> disabledMemberActionsMenu = new ArrayList<String>();
+        LinkedHashMap<String, Boolean> treasurerMemberActions = new LinkedHashMap<String, Boolean>();
 
         List<Discount> discounts = app.getDiscounts();
         boolean discountsAvailable = false;
+
         for(int i = 0; i < discounts.size(); i++) {
             System.out.println("DISCOUNT EQUAL" + member.hasDiscount(discounts.get(i)));
-            if(!member.hasDiscount(discounts.get(i))) {
+            Discount currentDiscount = discounts.get(i);
+            currentDiscount.checkCondition(member);
+            // If the discount is applicable and the member doesn't have it yet
+            // we show the discount menu
+            if(currentDiscount.checkCondition(member) && !member.hasDiscount(currentDiscount)) {
                 discountsAvailable = true;
                 break;
             }
         }
-        System.out.println(discountsAvailable + " " + discounts.size());
-        if (discountsAvailable)  {
-            memberActionsMenu.add("Apply discount.");
-        } else {
-         disabledMemberActionsMenu.add("Apply discount.");
-        }
-        if (member.hasPaidThisYear()) {
-            disabledMemberActionsMenu.add("Pay fee (already paid this year's fee).");
-        } else {
-            memberActionsMenu.add("Pay fee.");
-        }
-        memberActionsMenu.add("Members list (back to member list).");
+
+        treasurerMemberActions.put("Apply discount"
+                + (discountsAvailable ? "." : " (no available discounts)."), discountsAvailable);
+
+        boolean hasPaidThisYear = member.hasPaidThisYear();
+        treasurerMemberActions.put("Pay fee"
+                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), hasPaidThisYear);
+
+        treasurerMemberActions.put("Members list (back to member list).", true);
 
 
         String viewLabel = " - [Treasurer > Member actions menu ] <" + member.firstName + " " + member.lastName + "> - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, disabledMemberActionsMenu, memberActionsMenu);
+        int selectedOption = screenManager.showOptionsView(viewLabel, treasurerMemberActions);
+        System.out.println("SELECT " + selectedOption);
         switch (selectedOption) {
 
             case 0:
@@ -420,10 +419,10 @@ public class Main {
                     showTreasurerDiscountList(member);
                 } else {
                     // Show payment option
-                    if (member.hasPaidThisYear()) {
-                        showTreasurerMemberList();
-                    } else {
+                    if (hasPaidThisYear) {
                         showPaymentActions(member);
+                    } else {
+                        showTreasurerMemberList();
                     }
                 }
                 break;
@@ -431,10 +430,10 @@ public class Main {
                 // Show payment option
 
                 if (discountsAvailable) {
-                    if (member.hasPaidThisYear()) {
-                        showTreasurerMemberActions(member); // loop
-                    } else {
+                    if (hasPaidThisYear) {
                         showPaymentActions(member);
+                    } else {
+                        showTreasurerMemberActions(member); // loop
                     }
                 } else {
                     // Show payment option

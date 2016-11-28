@@ -2,7 +2,11 @@ package examproject.core;
 
 import examproject.db.Storable;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
+
+import static java.time.temporal.ChronoUnit.YEARS;
 
 public class SeniorDiscount implements Discount, Storable {
 
@@ -23,7 +27,10 @@ public class SeniorDiscount implements Discount, Storable {
 
     //TODO Use date to check condition if over 60
     public boolean checkCondition(Member member) {
-        return true;
+        if (YEARS.between(member.dateOfBirth, ZonedDateTime.now(ZoneOffset.UTC)) >= 60) {
+            return true;
+        }
+        return false;
     }
 
     /*
