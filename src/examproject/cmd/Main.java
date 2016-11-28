@@ -408,8 +408,9 @@ public class Main {
                 + (discountsAvailable ? "." : " (no available discounts)."), discountsAvailable);
 
         boolean hasPaidThisYear = member.hasPaidThisYear();
+        System.out.println("HAS PAID THIS YEAR" + hasPaidThisYear);
         treasurerMemberActions.put("Pay fee"
-                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), hasPaidThisYear);
+                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), !hasPaidThisYear);
 
         treasurerMemberActions.put("Members list (back to member list).", true);
 
@@ -425,7 +426,7 @@ public class Main {
                     showTreasurerDiscountList(member);
                 } else {
                     // Show payment option
-                    if (hasPaidThisYear) {
+                    if (!hasPaidThisYear) {
                         showPaymentActions(member);
                     } else {
                         showTreasurerMemberList();
@@ -436,7 +437,7 @@ public class Main {
                 // Show payment option
 
                 if (discountsAvailable) {
-                    if (hasPaidThisYear) {
+                    if (!hasPaidThisYear) {
                         showPaymentActions(member);
                     } else {
                         showTreasurerMemberActions(member); // loop

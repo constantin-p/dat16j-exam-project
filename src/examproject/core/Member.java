@@ -25,7 +25,6 @@ public class Member implements Storable {
 
     public Discipline preferredDiscipline;
 
-
     public ArrayList<LapTime> lapTimes = new ArrayList<LapTime>();
 
     public Member(String firstName, String lastName, String CPRNumber,
@@ -75,7 +74,7 @@ public class Member implements Storable {
     public boolean hasPaidThisYear() {
         int currentYear = ZonedDateTime.now(ZoneOffset.UTC).getYear();
         List<Payment> payments = this.getPayments();
-
+        System.out.println("PAYMENT - " + payments);
         for(int j = 0; j < payments.size(); j++) {
             if(payments.get(j).date.getYear() == currentYear) {
                 return true;
@@ -290,11 +289,11 @@ public class Member implements Storable {
         String isActive = valuesMap.get("is_active");
         String isElite = valuesMap.get("is_elite");
 
-        String prefferedDiscipline = valuesMap.get("discipline_name");
+        String preferredDiscipline = valuesMap.get("discipline_name");
 
         return new Member(firstName, lastName, CPRNumber,
                 ZonedDateTime.parse(dateOfBirth), ZonedDateTime.parse(dateOfRegistration),
-                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isElite), new Discipline(prefferedDiscipline));
+                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isElite), new Discipline(preferredDiscipline));
     }
 
     // For debugging
