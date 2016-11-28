@@ -1,7 +1,5 @@
 package examproject.core;
 
-import examproject.db.Storable;
-
 import java.util.HashMap;
 
 public class Treasurer extends AuthAccount {

@@ -187,7 +187,7 @@ public class Member implements Storable {
     }
 
     public void registerDiscount(Discount discount) {
-        // The discount already exists so create the juction with the member entry
+        // The discount already exists so create the junction with the member entry
         this.registerDiscountToMember(discount);
     }
 
@@ -250,6 +250,8 @@ public class Member implements Storable {
     }
 
 
+
+    // TODO: refactor
     public void registerLapTime(LapTime lapTime) {
         this.lapTimes.add(lapTime);
     }

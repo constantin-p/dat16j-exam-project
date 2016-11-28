@@ -54,7 +54,7 @@ public class CSVFileHandler {
         boolean isInsideValueString = false;
         while (currentChar > 0) {
             // Parsing logic
-            //      ignore: start & end wrapper chars, \r
+            //      ignore: start & end wrapper chars
             //      append: wrapper chars inside the value, normal chars
             //      end:    no need to check for newline chars, Files.lines()
             //              doesn't return line terminator chars within the string lines

@@ -202,6 +202,18 @@ public class DBTables {
         }
     }
 
+    static void createCoachMemberTable () {
+        // Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("member_cpr_number");
+            columns.add("coach_username");
+            Database.createTable("member_coach", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /*
      *  Helpers
      */

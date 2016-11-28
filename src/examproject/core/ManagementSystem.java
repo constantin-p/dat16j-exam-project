@@ -1,15 +1,11 @@
 package examproject.core;
 
 import examproject.db.Database;
-import examproject.db.TableHandler;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class ManagementSystem {
 
@@ -37,7 +33,7 @@ public class ManagementSystem {
             return new Response(false, "Wrong username/password.");
         }
 
-        this.currentChairman = (Chairman) Chairman.construct(entry);
+        this.currentChairman = Chairman.construct(entry);
         return new Response(true);
     }
 
@@ -62,7 +58,7 @@ public class ManagementSystem {
             return new Response(false, "Wrong username/password.");
         }
 
-        this.currentTreasurer = (Treasurer) Treasurer.construct(entry);
+        this.currentTreasurer = Treasurer.construct(entry);
         return new Response(true);
     }
 
@@ -87,16 +83,22 @@ public class ManagementSystem {
             return new Response(false, "Wrong username/password.");
         }
 
-        this.currentCoach = (Coach) Coach.construct(entry);
+        this.currentCoach = Coach.construct(entry);
         return new Response(true);
     }
+
+    public List<Member> getCoachMembers() {
+        return this.currentCoach.getMembers();
+    }
+
 
     /*
      *  Member functionality
      */
     public Response addMember(String firstName, String lastName, String CPRNumber,
                              ZonedDateTime dateOfBirth, ZonedDateTime dateOfRegistration,
-                             boolean isActive, boolean isElite, Discipline preferredDiscipline) {
+                             boolean isActive, boolean isElite, Discipline preferredDiscipline,
+                              Coach assignedCoach) {
 
         // Check for duplicate
         if (this.getMember(CPRNumber) != null) {
@@ -109,16 +111,11 @@ public class ManagementSystem {
 
         Database.getTable("members").insert(member.deconstruct());
 
+        // Assign the member to the coach
+        assignedCoach.registerMember(member);
+
         return new Response(true);
     }
-
-
-//    protected Member updateMember(String username, String password) {
-//        // placeholder functionality -> getMember(...id);
-//        // ?id
-//        ZonedDateTime dateOfRegistrationUTC = ZonedDateTime.now(ZoneOffset.UTC);
-//        return new Member("test", "test", new Date(), "test", dateOfRegistrationUTC);
-//    }
 
     public List<Member> getMembers() {
         List<HashMap<String, String>> entries;
@@ -136,6 +133,24 @@ public class ManagementSystem {
         }
 
         return members;
+    }
+
+    public List<Coach> getCoaches() {
+        List<HashMap<String, String>> entries;
+        try {
+            entries = Database.getTable("coaches").getAll();
+        } catch (IllegalArgumentException e) {
+            // No table with the given name was found, create the table and search again
+            DBTables.createCoachesTable();
+            entries = Database.getTable("coaches").getAll();
+        }
+
+        List<Coach> coaches = new ArrayList<Coach>();
+        for (HashMap<String, String> entry : entries) {
+            coaches.add(Coach.construct(entry));
+        }
+
+        return coaches;
     }
 
     public List<Discount> getDiscounts() {

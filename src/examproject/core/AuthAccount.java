@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class AuthAccount implements Storable {
 
-    private String username;
+    public String username;
     private String password;
 
     public AuthAccount (String username, String password) {

@@ -42,6 +42,7 @@ public class Main {
         }
     }
 
+
     /*
      *  Chairman views
      */
@@ -115,9 +116,10 @@ public class Main {
         List<Discipline> disciplines = app.getDisciplines();
 
         Discipline preferredDiscipline = showDisciplineList("[Chairman > Add new member] ");
+        Coach assignedCoach = showCoachesList("[Chairman > Add new member] ");
 
         Response response = app.addMember(firstName, lastName, CPRNumber, dateOfBirth,
-                ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite, preferredDiscipline);
+                ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite, preferredDiscipline, assignedCoach);
         if (response.success) {
             screenManager.showInfoView("Member added!");
             showChairmanMenu();
@@ -126,6 +128,7 @@ public class Main {
             showChairmanMenu();
         }
     }
+
 
     /*
      *  Treasurer views
@@ -171,6 +174,117 @@ public class Main {
         }
     }
 
+    private static void showTreasurerMemberList() {
+        List<Member> members = app.getMembers();
+        List<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            String currentMemberDiscounts = "";
+
+            if(Objects.equals(currentMemberDiscounts, "")) {
+                options.add(currentMember.firstName + " " + currentMember.lastName
+                        + " " + currentMember.CPRNumber + " No discounts applied for this account.");
+            } else {
+                options.add(currentMember.firstName + " " + currentMember.lastName
+                        + " " + currentMember.CPRNumber + " discounts: " + currentMemberDiscounts);
+            }
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - [Treasurer] Member list - ", options);
+        showTreasurerMemberActions(members.get(selectedMemberIndex));
+    }
+
+    private static void showTreasurerMemberActions(Member member) {
+        LinkedHashMap<String, Boolean> treasurerMemberActions = new LinkedHashMap<String, Boolean>();
+
+        List<Discount> discounts = app.getDiscounts();
+        boolean discountsAvailable = false;
+
+        for(int i = 0; i < discounts.size(); i++) {
+            Discount currentDiscount = discounts.get(i);
+            currentDiscount.checkCondition(member);
+            // If the discount is applicable and the member doesn't have it yet
+            // we show the discount menu
+            if(currentDiscount.checkCondition(member) && !member.hasDiscount(currentDiscount)) {
+                discountsAvailable = true;
+                break;
+            }
+        }
+
+        treasurerMemberActions.put("Apply discount"
+                + (discountsAvailable ? "." : " (no available discounts)."), discountsAvailable);
+
+        boolean hasPaidThisYear = member.hasPaidThisYear();
+        treasurerMemberActions.put("Pay fee"
+                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), !hasPaidThisYear);
+
+        treasurerMemberActions.put("Members list (back to member list).", true);
+
+
+        String viewLabel = " - [Treasurer > Member actions menu ] <" + member.firstName + " " + member.lastName + "> - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, treasurerMemberActions);
+        System.out.println("SELECT " + selectedOption);
+        switch (selectedOption) {
+
+            case 0:
+                // Show discount option
+                if (discountsAvailable) {
+                    showTreasurerDiscountList(member);
+                } else {
+                    // Show payment option
+                    if (!hasPaidThisYear) {
+                        showPaymentActions(member);
+                    } else {
+                        showTreasurerMemberList();
+                    }
+                }
+                break;
+            case 1:
+                // Show payment option
+
+                if (discountsAvailable) {
+                    if (!hasPaidThisYear) {
+                        showPaymentActions(member);
+                    } else {
+                        showTreasurerMemberActions(member); // loop
+                    }
+                } else {
+                    // Show payment option
+                    showTreasurerMemberList();
+                }
+                break;
+            case 2:
+                // Back to member list option
+                showTreasurerMemberList();
+                break;
+        }
+    }
+
+    private static void showTreasurerDiscountList(Member member) {
+        List<Discount> discounts = app.getDiscounts();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the discounts and create a string for the option label
+        for (int i = 0; i < discounts.size(); i++) {
+            Discount currentDiscount = discounts.get(i);
+            if (!member.hasDiscount(currentDiscount)) {
+                options.add("<" + currentDiscount.getType() + ">  modifier: "
+                        + (currentDiscount.getModifier() * 100) + "%.");
+            } else {
+                discounts.remove(i);
+                i--;
+            }
+        }
+
+        int selectedDiscount = screenManager.showOptionsView(" - [Treasurer] Discount list - ", options);
+        member.registerDiscount(discounts.get(selectedDiscount));
+        screenManager.showInfoView("Discount applied!");
+        showTreasurerMemberActions(member);
+    }
 
     /*
      * Coach views
@@ -193,7 +307,7 @@ public class Main {
     private static void showCoachMenu() {
         ArrayList<String> coachMenu = new ArrayList<String>();
         coachMenu.add("View my members.");
-        coachMenu.add("View disciplines leaderboards");
+        coachMenu.add("View discipline leaderboards.");
 
         coachMenu.add("Log out (back to main menu).");
 
@@ -216,6 +330,22 @@ public class Main {
         }
 
     }
+
+    private static void showCoachMemberList() {
+        List<Member> members = app.getCoachMembers();
+        List<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber);
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Coach Member list - ", options);
+        showCoachMemberActions(members.get(selectedMemberIndex));
+    }
+
 
     /*
      *  Discipline views
@@ -257,22 +387,6 @@ public class Main {
     /*
      *  Member views (Coach)
      */
-
-    private static void showCoachMemberList() {
-        List<Member> members = app.getMembers();
-        List<String> options = new ArrayList<String>();
-
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the members and create a string for the option label
-        for(int i = 0; i < members.size(); i++) {
-            Member currentMember = members.get(i);
-            options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber);
-        }
-
-        int selectedMemberIndex = screenManager.showOptionsView(" - Coach Member list - ", options);
-        showCoachMemberActions(members.get(selectedMemberIndex));
-    }
-
     private static void showCoachMemberActions(Member member) {
         ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
         coachMemberActionsMenu.add("Available competitions.");
@@ -363,96 +477,6 @@ public class Main {
 
 
 
-    private static void showTreasurerMemberList() {
-        List<Member> members = app.getMembers();
-        List<String> options = new ArrayList<String>();
-
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the members and create a string for the option label
-        for(int i = 0; i < members.size(); i++) {
-            Member currentMember = members.get(i);
-            String currentMemberDiscounts = "";
-
-            if(Objects.equals(currentMemberDiscounts, "")) {
-                options.add(currentMember.firstName + " " + currentMember.lastName
-                        + " " + currentMember.CPRNumber + " No discounts applied for this account.");
-            } else {
-                options.add(currentMember.firstName + " " + currentMember.lastName
-                        + " " + currentMember.CPRNumber + " discounts: " + currentMemberDiscounts);
-            }
-        }
-
-        int selectedMemberIndex = screenManager.showOptionsView(" - [Treasurer] Member list - ", options);
-        showTreasurerMemberActions(members.get(selectedMemberIndex));
-    }
-
-    private static void showTreasurerMemberActions(Member member) {
-        LinkedHashMap<String, Boolean> treasurerMemberActions = new LinkedHashMap<String, Boolean>();
-
-        List<Discount> discounts = app.getDiscounts();
-        boolean discountsAvailable = false;
-
-        for(int i = 0; i < discounts.size(); i++) {
-            System.out.println("DISCOUNT EQUAL" + member.hasDiscount(discounts.get(i)));
-            Discount currentDiscount = discounts.get(i);
-            currentDiscount.checkCondition(member);
-            // If the discount is applicable and the member doesn't have it yet
-            // we show the discount menu
-            if(currentDiscount.checkCondition(member) && !member.hasDiscount(currentDiscount)) {
-                discountsAvailable = true;
-                break;
-            }
-        }
-
-        treasurerMemberActions.put("Apply discount"
-                + (discountsAvailable ? "." : " (no available discounts)."), discountsAvailable);
-
-        boolean hasPaidThisYear = member.hasPaidThisYear();
-        System.out.println("HAS PAID THIS YEAR" + hasPaidThisYear);
-        treasurerMemberActions.put("Pay fee"
-                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), !hasPaidThisYear);
-
-        treasurerMemberActions.put("Members list (back to member list).", true);
-
-
-        String viewLabel = " - [Treasurer > Member actions menu ] <" + member.firstName + " " + member.lastName + "> - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, treasurerMemberActions);
-        System.out.println("SELECT " + selectedOption);
-        switch (selectedOption) {
-
-            case 0:
-                // Show discount option
-                if (discountsAvailable) {
-                    showTreasurerDiscountList(member);
-                } else {
-                    // Show payment option
-                    if (!hasPaidThisYear) {
-                        showPaymentActions(member);
-                    } else {
-                        showTreasurerMemberList();
-                    }
-                }
-                break;
-            case 1:
-                // Show payment option
-
-                if (discountsAvailable) {
-                    if (!hasPaidThisYear) {
-                        showPaymentActions(member);
-                    } else {
-                        showTreasurerMemberActions(member); // loop
-                    }
-                } else {
-                    // Show payment option
-                    showTreasurerMemberList();
-                }
-                break;
-            case 2:
-                // Back to member list option
-                showTreasurerMemberList();
-                break;
-        }
-    }
 
     private static void showPaymentActions(Member member) {
         ArrayList<String> paymentActionsMenu = new ArrayList<String>();
@@ -475,7 +499,6 @@ public class Main {
                 break;
         }
     }
-
 
     private static void showMembersWithLatePayments() {
         List<Member> members = app.getMembers();
@@ -501,30 +524,6 @@ public class Main {
     /*
      *  Discount views
      */
-    private static void showTreasurerDiscountList(Member member) {
-        List<Discount> discounts = app.getDiscounts();
-        ArrayList<String> options = new ArrayList<String>();
-
-        // TODO: REFACTOR show enabled discounts and add as an option only the available ones
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the discounts and create a string for the option label
-        for (int i = 0; i < discounts.size(); i++) {
-            Discount currentDiscount = discounts.get(i);
-            if (!member.hasDiscount(currentDiscount)) {
-                options.add("<" + currentDiscount.getType() + ">  modifier: "
-                        + (currentDiscount.getModifier() * 100) + "%.");
-            } else {
-                discounts.remove(i);
-                i--;
-            }
-        }
-
-        int selectedDiscount = screenManager.showOptionsView(" - [Treasurer] Discount list - ", options);
-        member.registerDiscount(discounts.get(selectedDiscount));
-        screenManager.showInfoView("Discount applied!");
-        showTreasurerMemberActions(member);
-    }
-
 
 
     /*
@@ -544,5 +543,21 @@ public class Main {
         int selectedDisciplineIndex = screenManager.showOptionsView(" - "
                 + labelPrefix + "Discipline list - ", options);
         return disciplines.get(selectedDisciplineIndex);
+    }
+
+    private static Coach showCoachesList(String labelPrefix) {
+        List<Coach> coaches = app.getCoaches();
+        List<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < coaches.size(); i++) {
+            Coach currentCoach = coaches.get(i);
+            options.add(currentCoach.username);
+        }
+
+        int selectedCoachIndex = screenManager.showOptionsView(" - "
+                + labelPrefix + "Coach list - ", options);
+        return coaches.get(selectedCoachIndex);
     }
 }
