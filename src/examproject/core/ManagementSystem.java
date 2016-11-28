@@ -215,14 +215,13 @@ public class ManagementSystem {
         HashMap<String, String> searchQuery = new HashMap<String, String>();
         searchQuery.put("discipline_name", discipline.name);
 
-
         List<HashMap<String, String>> entries;
         try {
-            entries = Database.getTable("members").getAll();
+            entries = Database.getTable("members").getAll(searchQuery);
         } catch (IllegalArgumentException e) {
             // No table with the given name was found, create the table and search again
             DBTables.createMembersTable();
-            entries = Database.getTable("members").getAll();
+            entries = Database.getTable("members").getAll(searchQuery);
         }
 
         for (HashMap<String, String> entry : entries) {

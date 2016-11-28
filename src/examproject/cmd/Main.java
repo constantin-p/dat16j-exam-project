@@ -286,6 +286,7 @@ public class Main {
         showTreasurerMemberActions(member);
     }
 
+    
     /*
      * Coach views
      */
@@ -388,13 +389,13 @@ public class Main {
                     showCoachMemberActions(member);
                 } else {
                     // Register time
-                    showMemberTimeForm(member);
+                    showCoachMemberTimeForm(member);
                 }
                 break;
             case 1:
                 if (competitionsAvailable) {
                     // Register time
-                    showMemberTimeForm(member);
+                    showCoachMemberTimeForm(member);
                 } else {
                     // Back to member list option
                     showCoachMemberList();
@@ -425,11 +426,18 @@ public class Main {
         for (int i = 0; i < competitions.size(); i++) {
             Competition currentCompetition = competitions.get(i);
             boolean isRegistered = currentCompetition.hasMember(member);
-            options.put(currentCompetition.name + " " + currentCompetition.discipline.name
-                    + (isRegistered ? " (already registered)." : "."), !isRegistered);
+            boolean isSameDiscipline = member.preferredDiscipline.name.equals(currentCompetition.discipline.name);
+
+            if (!isSameDiscipline) {
+                options.put(currentCompetition.name + " " + currentCompetition.discipline.name
+                        + " (different discipline).", false);
+            } else {
+                options.put(currentCompetition.name + " " + currentCompetition.discipline.name
+                        + (isRegistered ? " (already registered)." : "."), !isRegistered);
+            }
 
             // Remove the selected option so we have the right index returned from showOptionsView
-            if (isRegistered) {
+            if (isRegistered || !isSameDiscipline) {
                 competitions.remove(i);
                 i--;
             }
@@ -467,7 +475,7 @@ public class Main {
         return competitions.get(selectedCompetitionIndex);
     }
 
-    private static void showMemberTimeForm(Member member) {
+    private static void showCoachMemberTimeForm(Member member) {
         LocalTime time = screenManager.showTimeInputView(" - [Register time] Time: - ");
         ZonedDateTime date = screenManager.showDateInputView(" - [Register time] Date: - ");
 
@@ -535,10 +543,6 @@ public class Main {
         }
     }
 
-
-    /*
-     *  Discipline views
-     */
     private static void showCoachDisciplineList() {
         List<Discipline> disciplines = app.getDisciplines();
         ArrayList<String> options = new ArrayList<String>();
@@ -551,38 +555,32 @@ public class Main {
         }
 
         int selectedDisciplineIndex = screenManager.showOptionsView(" - Discipline list - ", options);
-        System.out.println("Not yet implemented!");
-//        showDisciplineLeaderboard(disciplines.get(selectedDisciplineIndex));
+        showCoachDisciplineLeaderboard(disciplines.get(selectedDisciplineIndex));
     }
 
-//    private static void showDisciplineLeaderboard(Discipline discipline) {
-//        ArrayList<Member> leaderboardScores = discipline.getLeaderboard().getScores();
-//        ArrayList<String> options = new ArrayList<String>();
-//
-//        // setOptionsView accepts an ArrayList of strings, so
-//        // loop throw all the members and create a string for the option label
-//        for(int i = 0; i < leaderboardScores.size(); i++) {
-//            Member currentParticipant = leaderboardScores.get(i);
-//            options.add(currentParticipant.firstName + " " + currentParticipant.lastName + " ");
-//        }
-//
-//
-//        String viewLabel = " - <" + discipline.name + "> leaderboard - ";
-//        screenManager.showInfoView(viewLabel, options);
-//    }
-//
+    private static void showCoachDisciplineLeaderboard(Discipline discipline) {
+        LinkedHashMap<String, Boolean> coachMemberActions = new LinkedHashMap<String, Boolean>();
+        LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(discipline).getResults();
+
+        for (Map.Entry<Member, LapTime> entry : leaderboardResults.entrySet()) {
+            coachMemberActions.put(entry.getKey().firstName + " "
+                    + entry.getKey().lastName + "   " + entry.getKey().preferredDiscipline
+                    + "   " + entry.getValue().time, false);
+        }
+
+        coachMemberActions.put("Exit (back to coach menu).", true);
+
+        int selectedOption = screenManager.showOptionsView(" - [Coach > Leaderboard list] <"
+                + discipline.name + "> - ", coachMemberActions);
+        switch (selectedOption) {
+            case 0:
+                // Back to coach menu
+                showCoachMenu();
+        }
+    }
 
 
-
-    /*
-     *  Member views (Treasurer)
-     */
-
-
-
-
-
-
+    // TODO: refactor
     private static void showPaymentActions(Member member) {
         ArrayList<String> paymentActionsMenu = new ArrayList<String>();
         paymentActionsMenu.add("Accept (pay fee).");
@@ -626,9 +624,6 @@ public class Main {
         int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
         showTreasurerMemberActions(members.get(selectedMemberIndex));
     }
-    /*
-     *  Discount views
-     */
 
 
     /*
@@ -665,5 +660,4 @@ public class Main {
                 + labelPrefix + "Coach list - ", options);
         return coaches.get(selectedCoachIndex);
     }
-
 }
