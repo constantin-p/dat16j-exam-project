@@ -124,7 +124,7 @@ public class Member implements Storable {
         try {
             Database.getTable("member_payment").insert(memberPaymentJunction);
         } catch (IllegalArgumentException e) {
-            // No table with the given name was found, create the table and insert the payment_member entry
+            // No table with the given name was found, create the table and insert the member_payment entry
             DBTables.createPaymentMemberTable();
             Database.getTable("member_payment").insert(memberPaymentJunction);
         }
@@ -199,7 +199,7 @@ public class Member implements Storable {
         try {
             Database.getTable("member_discount").insert(memberDiscountJunction);
         } catch (IllegalArgumentException e) {
-            // No table with the given name was found, create the table and insert the payment_member entry
+            // No table with the given name was found, create the table and insert the member_discount entry
             DBTables.createPaymentMemberTable();
             Database.getTable("member_discount").insert(memberDiscountJunction);
         }

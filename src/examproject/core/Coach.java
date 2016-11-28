@@ -16,7 +16,7 @@ public class Coach extends AuthAccount {
      *  Members
      */
     public void registerMember(Member member) {
-        // The discount already exists so create the junction with the member entry
+        // The member already exists so create the junction with the member entry
         this.registerMemberToCoach(member);
     }
 
@@ -28,7 +28,7 @@ public class Coach extends AuthAccount {
         try {
             Database.getTable("member_coach").insert(coachMemberJunction);
         } catch (IllegalArgumentException e) {
-            // No table with the given name was found, create the table and insert the payment_member entry
+            // No table with the given name was found, create the table and insert the member_coach entry
             DBTables.createCoachMemberTable();
             Database.getTable("member_coach").insert(coachMemberJunction);
         }

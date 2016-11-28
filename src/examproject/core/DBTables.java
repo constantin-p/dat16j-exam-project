@@ -113,13 +113,13 @@ public class DBTables {
         try {
             TableHandler table = Database.getTable("competitions");
 
-            table.insert(new Competition("World Aquatics",
+            table.insert(new Competition("WORLD_AQUATICS",
                     disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Duel in the Pool",
+            table.insert(new Competition("DUEL_IN_THE_POOL",
                     disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Back it up",
+            table.insert(new Competition("BACK_IT_UP",
                     disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
-            table.insert(new Competition("Last one alive wins",
+            table.insert(new Competition("LAST_ONE_ALIVE_WINS",
                     disciplines.get(getRandom(disciplines.size() - 1))).deconstruct());
 
         } catch (IllegalArgumentException e) {
@@ -209,6 +209,18 @@ public class DBTables {
             columns.add("member_cpr_number");
             columns.add("coach_username");
             Database.createTable("member_coach", columns);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void createCompetitionMemberTable () {
+        // Create the table
+        try {
+            List<String> columns = new ArrayList<String>();
+            columns.add("member_cpr_number");
+            columns.add("competition_name");
+            Database.createTable("member_competition", columns);
         } catch (Exception e) {
             e.printStackTrace();
         }

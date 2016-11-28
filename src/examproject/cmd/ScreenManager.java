@@ -67,12 +67,14 @@ class ScreenManager {
     }
 
     int showRangeInputView(int min, int max) {
-        System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
+        System.out.println("\n Enter your choice [" + (min == max
+                ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 
     int showRangeInputView(String label, int min, int max) {
-        System.out.println("\n " + label + " [" + min + "-" + max + "]:");
+        System.out.println("\n " + label + " [" + (min == max
+                ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 

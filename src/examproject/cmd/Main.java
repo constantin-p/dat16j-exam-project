@@ -205,7 +205,6 @@ public class Main {
 
         for(int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
-            currentDiscount.checkCondition(member);
             // If the discount is applicable and the member doesn't have it yet
             // we show the discount menu
             if(currentDiscount.checkCondition(member) && !member.hasDiscount(currentDiscount)) {
@@ -224,7 +223,7 @@ public class Main {
         treasurerMemberActions.put("Members list (back to member list).", true);
 
 
-        String viewLabel = " - [Treasurer > Member actions menu ] <" + member.firstName + " " + member.lastName + "> - ";
+        String viewLabel = " - [Treasurer > Member actions menu] <" + member.firstName + " " + member.lastName + "> - ";
         int selectedOption = screenManager.showOptionsView(viewLabel, treasurerMemberActions);
         System.out.println("SELECT " + selectedOption);
         switch (selectedOption) {
@@ -305,22 +304,24 @@ public class Main {
     }
 
     private static void showCoachMenu() {
-        ArrayList<String> coachMenu = new ArrayList<String>();
-        coachMenu.add("View my members.");
-        coachMenu.add("View discipline leaderboards.");
+        LinkedHashMap<String, Boolean> coachMenu = new LinkedHashMap<String, Boolean>();
 
-        coachMenu.add("Log out (back to main menu).");
+        boolean hasMembers = !app.getCoachMembers().isEmpty();
+        coachMenu.put("View my members"
+                + (hasMembers ? "." : " (no members assigned to you)."), hasMembers);
+
+        coachMenu.put("View discipline leaderboards.", true);
+        coachMenu.put("Log out (back to main menu).", true);
 
         int selectedOption = screenManager.showOptionsView(" - Coach menu - ", coachMenu);
         switch (selectedOption) {
             case 0:
                 // View my members option
-                // TODO display only members assigned to specific coach
                 showCoachMemberList();
                 break;
             case 1:
                 // View leaderboards option
-                // TODO display array ofleaderboards for different disciplines of members assigned to coach
+                // TODO display array of leaderboards for different disciplines of members assigned to coach
                 showCoachDisciplineList();
                 break;
             case 2:
@@ -346,6 +347,99 @@ public class Main {
         showCoachMemberActions(members.get(selectedMemberIndex));
     }
 
+    private static void showCoachMemberActions(Member member) {
+        LinkedHashMap<String, Boolean> coachMemberActions = new LinkedHashMap<String, Boolean>();
+
+        List<Competition> competitions = app.getCompetitions();
+        boolean competitionsAvailable = false;
+
+        for(int i = 0; i < competitions.size(); i++) {
+            Competition currentCompetition = competitions.get(i);
+            // If there are competitions in which the member is not yet registered
+            // we show the competitions menu
+            if(!currentCompetition.hasMember(member)) {
+                competitionsAvailable = true;
+                break;
+            }
+        }
+
+
+        coachMemberActions.put("Available competitions"
+                + (competitionsAvailable ? "." : " (no available competitions)."), competitionsAvailable);
+
+        coachMemberActions.put("Register time.", true);
+
+        coachMemberActions.put("Members list (back to member list).", true);
+        coachMemberActions.put("Exit (back to coach menu).", true);
+
+
+        String viewLabel = " - [Coach > Member actions menu] <" + member.firstName
+                + " " + member.lastName + "> - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, coachMemberActions);
+        switch (selectedOption) {
+            case 0:
+                if (competitionsAvailable) {
+                    // View available competitions
+                    Competition selectedCompetition = showCoachCompetitionList(member);
+                    selectedCompetition.registerMember(member);
+                    screenManager.showInfoView("Member <" + member.firstName
+                            + " " + member.lastName + "> has been registered to the following competition: "
+                            + selectedCompetition.name);
+                    showCoachMemberActions(member);
+                } else {
+                    // Register time
+                    showMemberTimeForm(member);
+                }
+                break;
+            case 1:
+                if (competitionsAvailable) {
+                    // Register time
+                    showMemberTimeForm(member);
+                } else {
+                    // Back to member list option
+                    showCoachMemberList();
+                }
+                break;
+            case 2:
+                if (competitionsAvailable) {
+                    // Back to member list option
+                    showCoachMemberList();
+                } else {
+                    // Back to coach menu
+                    showCoachMenu();
+                }
+                break;
+            case 3:
+                // Back to coach menu
+                showCoachMenu();
+        }
+    }
+
+    private static Competition showCoachCompetitionList(Member member) {
+        List<Competition> competitions = app.getCompetitions();
+        LinkedHashMap<String, Boolean> options = new LinkedHashMap<String, Boolean>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the competitions and create a string for the option label
+        // also disable competitions for which the member is already registered to
+        for (int i = 0; i < competitions.size(); i++) {
+            Competition currentCompetition = competitions.get(i);
+            boolean isRegistered = currentCompetition.hasMember(member);
+            options.put(currentCompetition.name + " " + currentCompetition.discipline.name
+                    + (isRegistered ? " (already registered)." : "."), !isRegistered);
+
+            // Remove the selected option so we have the rgith index returned from showOptionsView
+            if (isRegistered) {
+                competitions.remove(i);
+                i--;
+            }
+        }
+
+        String viewLabel = " - [Coach > Member actions menu] <" + member.firstName
+                + " " + member.lastName + "> Competition list - ";
+        int selectedCompetitionIndex = screenManager.showOptionsView(viewLabel, options);
+        return competitions.get(selectedCompetitionIndex);
+    }
 
     /*
      *  Discipline views
@@ -383,55 +477,6 @@ public class Main {
 //    }
 //
 
-
-    /*
-     *  Member views (Coach)
-     */
-    private static void showCoachMemberActions(Member member) {
-        ArrayList<String> coachMemberActionsMenu = new ArrayList<String>();
-        coachMemberActionsMenu.add("Available competitions.");
-        coachMemberActionsMenu.add("Register time.");
-
-        coachMemberActionsMenu.add("Members list (back to member list).");
-        coachMemberActionsMenu.add("Exit (back to coach menu)");
-
-        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> actions menu - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, coachMemberActionsMenu);
-        switch (selectedOption) {
-            case 0:
-                // View available competitions
-                Competition selectedCompetition = showCompetitionList(member);
-                selectedCompetition.enterCompetition(member);
-                screenManager.showInfoView("Member <" + member.firstName + " " + member.lastName + "> has been registered to the following competition: " + selectedCompetition.name);
-                break;
-            case 1:
-                // Register time
-                showMemberTimeForm(member);
-                break;
-
-            case 2:
-                // Back to member list option
-                showCoachMemberList();
-                break;
-            case 3:
-                // Back to coach menu
-                showCoachMenu();
-        }
-    }
-    private static Competition showCompetitionList(Member member) {
-        List<Competition> competitions = app.getCompetitions();
-        ArrayList<String> options = new ArrayList<String>();
-
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the members and create a string for the option label
-        for (int i = 0; i < competitions.size(); i++) {
-            Competition  currentCompetition = competitions.get(i);
-            options.add(currentCompetition.name + " " + currentCompetition.discipline.name);
-        }
-
-        int selectedCompetitionIndex = screenManager.showOptionsView(" - Competition list - ", options);
-        return competitions.get(selectedCompetitionIndex);
-    }
 
 
     /*
