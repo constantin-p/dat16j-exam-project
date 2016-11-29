@@ -168,7 +168,7 @@ public class Main {
     private static void showTreasurerMemberList() {
         List<Member> members = app.getMembers();
         List<Discount> discounts = app.getDiscounts();
-        Map<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
+        LinkedHashMap<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
 
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
@@ -259,7 +259,7 @@ public class Main {
 
     private static void showTreasurerDiscountList(Member member) {
         List<Discount> discounts = app.getDiscounts();
-        Map<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
+        LinkedHashMap<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
 
         for (int i = 0; i < discounts.size(); i++) {
             Discount currentDiscount = discounts.get(i);
@@ -281,7 +281,7 @@ public class Main {
 
     private static void showTreasurerMembersWithLatePayments() {
         List<Member> members = app.getMembers();
-        Map<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
+        LinkedHashMap<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
 
         for(int i = 0; i < members.size(); i++) {
             Member currentMember = members.get(i);
