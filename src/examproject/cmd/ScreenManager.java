@@ -10,25 +10,18 @@ import java.util.*;
 
 class ScreenManager {
 
+    private static final int CELL_WIDTH = 20;
+    private static final String VIEW_SEP = "*--------------------------------------*";
+    private static final String DATE_FORMAT = "MM-dd-yyyy";
+
     private Scanner scanner;
 
     ScreenManager() {
         this.scanner = new Scanner(System.in);
     }
 
-    int showOptionsView(String label, List<String> options) {
-        System.out.println("*--------------------------------------*");
-        System.out.println("\n" + label + "\n");
-
-        for (int i = 0; i < options.size(); i++) {
-            System.out.println(" [" + (i + 1) + "]   " + options.get(i));
-        }
-
-        return showRangeInputView(1, options.size()) - 1;
-    }
-
     int showOptionsView(String label, LinkedHashMap<String, Boolean> options) {
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
 
         int i = 0;
@@ -45,7 +38,7 @@ class ScreenManager {
 
     void showCallbackOptionsView(String label, LinkedHashMap<ScreenOption, Boolean> options) {
         HashMap<Integer, ScreenOption> shownOptions = new HashMap<Integer, ScreenOption>();
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
 
         int i = 0;
@@ -62,12 +55,44 @@ class ScreenManager {
         shownOptions.get(showRangeInputView(1, i)).callback.run();
     }
 
+    void showCallbackOptionsTableView(String label, LinkedHashMap<ScreenTableOption, Boolean> options) {
+        HashMap<Integer, ScreenTableOption> shownOptions = new HashMap<Integer, ScreenTableOption>();
+        System.out.println(VIEW_SEP);
+        System.out.println("\n" + label + "\n");
+
+        int i = 0;
+        boolean isFirstRow = true;
+        for (Map.Entry<ScreenTableOption, Boolean> entry : options.entrySet()) {
+            // If we have rows we also have access to the column names, so display the table header
+            if (isFirstRow) {
+                System.out.println("       " + ScreenTableOption.getHeaderStringFromRow(entry.getKey().row, CELL_WIDTH));
+                System.out.println("       " + ScreenTableOption.getSepStringFromRow(entry.getKey().row, CELL_WIDTH));
+                isFirstRow = false;
+            }
+
+            if (entry.getValue()) {
+                i++;
+                shownOptions.put(i, entry.getKey());
+                System.out.println(" [" + (i) + "]   " + entry.getKey().getRowString(CELL_WIDTH));
+            } else {
+                System.out.println(" [*]   " + entry.getKey().getRowString(CELL_WIDTH));
+            }
+        }
+
+        shownOptions.get(showRangeInputView(1, i)).callback.run();
+    }
+
     void showInfoView(String label) {
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
     }
 
-    int rangeInputViewLoop(int min, int max) {
+    void showErrorView(String label) {
+        System.out.println(VIEW_SEP);
+        System.out.println("\n[ERROR] " + label + "\n");
+    }
+
+    private int rangeInputViewLoop(int min, int max) {
         while (true) {
             if (this.scanner.hasNextInt()) {
                 int input = this.scanner.nextInt();
@@ -86,20 +111,20 @@ class ScreenManager {
         }
     }
 
-    int showRangeInputView(int min, int max) {
+    private int showRangeInputView(int min, int max) {
         System.out.println("\n Enter your choice [" + (min == max
                 ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 
-    int showRangeInputView(String label, int min, int max) {
+    private int showRangeInputView(String label, int min, int max) {
         System.out.println("\n " + label + " [" + (min == max
                 ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 
     LocalTime showTimeInputView(String label) {
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
 
         // Minutes (0 - 60)
@@ -112,7 +137,7 @@ class ScreenManager {
     }
 
     ZonedDateTime showDateInputView(String label) {
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
 
         while (true) {
@@ -148,7 +173,7 @@ class ScreenManager {
     }
 
     String showStringInputView(String label, int minLength, int maxLength) {
-        System.out.println("*--------------------------------------*");
+        System.out.println(VIEW_SEP);
         System.out.println("\n" + label + "\n");
 
         while (true) {
@@ -166,10 +191,64 @@ class ScreenManager {
         }
     }
 
+
     /*
      *  Helpers
      */
-    private String padLeft(String s, int n, char c) {
-        return String.format("%1$" + n + "s", s).replace(' ', c);
+    public static String parseType(String str) {
+        if (str.length() == 0) {
+            return "";
+        }
+        str = str.replace('_', ' ');
+        return str.substring(0,1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+
+    public static String parseDate(ZonedDateTime date) {
+        return date.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+    }
+
+    public static String padRight(String str, int length) {
+        return padRight(str, length, ' ');
+    }
+
+    public static String padRight(String str, int length, char padChar) {
+        return String.format("%1$-" + length + "s", str).replace(' ', padChar);
+    }
+
+    public static String padLeft(String str, int length) {
+        return padLeft(str, length, ' ');
+    }
+
+    public static String padLeft(String str, int length, char padChar) {
+        return String.format("%1$" + length + "s", str).replace(' ', padChar);
+    }
+
+    // Algorithm modified from:
+    // http://stackoverflow.com/questions/3597550/ideal-method-to-truncate-a-string-with-ellipsis
+    public static String ellipse(String text, int max) {
+        if (text.length() <= max)
+            return text;
+
+        // Start by chopping off at the word before max
+        // This is an over-approximation due to thin-characters...
+        int end = text.lastIndexOf(' ', max - 3);
+
+        // Just one long word. Chop it off.
+        if (end == -1)
+            return text.substring(0, max-3) + "...";
+
+        // Step forward as long as textWidth allows.
+        int newEnd = end;
+        do {
+            end = newEnd;
+            newEnd = text.indexOf(' ', end + 1);
+
+            // No more spaces.
+            if (newEnd == -1)
+                newEnd = text.length();
+
+        } while ((text.substring(0, newEnd) + "...").length() < max);
+
+        return text.substring(0, end) + "...";
     }
 }
