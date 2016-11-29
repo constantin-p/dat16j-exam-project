@@ -74,7 +74,7 @@ public class Member implements Storable {
     public boolean hasPaidThisYear() {
         int currentYear = ZonedDateTime.now(ZoneOffset.UTC).getYear();
         List<Payment> payments = this.getPayments();
-        System.out.println("PAYMENT - " + payments);
+
         for(int j = 0; j < payments.size(); j++) {
             if(payments.get(j).date.getYear() == currentYear) {
                 return true;
