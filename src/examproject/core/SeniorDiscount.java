@@ -25,7 +25,6 @@ public class SeniorDiscount implements Discount, Storable {
         return TYPE;
     }
 
-    //TODO Use date to check condition if over 60
     public boolean checkCondition(Member member) {
         if (YEARS.between(member.dateOfBirth, ZonedDateTime.now(ZoneOffset.UTC)) >= 60) {
             return true;

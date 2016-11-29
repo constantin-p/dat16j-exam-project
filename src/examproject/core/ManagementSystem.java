@@ -2,7 +2,6 @@ package examproject.core;
 
 import examproject.db.Database;
 
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,8 +110,10 @@ public class ManagementSystem {
 
         Database.getTable("members").insert(member.deconstruct());
 
-        // Assign the member to the coach
-        assignedCoach.registerMember(member);
+        // Assign the member to the coach (only for elite members)
+        if (isElite && assignedCoach != null) {
+            assignedCoach.registerMember(member);
+        }
 
         return new Response(true);
     }

@@ -117,7 +117,10 @@ public class Main {
         List<Discipline> disciplines = app.getDisciplines();
 
         Discipline preferredDiscipline = showDisciplineList("[Chairman > Add new member] ");
-        Coach assignedCoach = showCoachesList("[Chairman > Add new member] ");
+
+        Coach assignedCoach = isElite
+                ? showCoachesList("[Chairman > Add new member] ")
+                : null;
 
         Response response = app.addMember(firstName, lastName, CPRNumber, dateOfBirth,
                 ZonedDateTime.now(ZoneOffset.UTC), isActive, isElite, preferredDiscipline, assignedCoach);
@@ -152,27 +155,27 @@ public class Main {
     }
 
     private static void showTreasurerMenu() {
-        ArrayList<String> treasurerMenu = new ArrayList<String>();
-        treasurerMenu.add("Show members.");
-        treasurerMenu.add("Show members with late payments.");
+        LinkedHashMap<ScreenOption, Boolean> treasurerMenu = new LinkedHashMap<ScreenOption, Boolean>();
 
-        treasurerMenu.add("Log out (back to main menu).");
+        List<Member> members = app.getMembers();
+        boolean membersWithLatePayments = false;
 
-        int selectedOption = screenManager.showOptionsView(" - Treasurer menu - ", treasurerMenu);
-        switch (selectedOption) {
-            case 0:
-                // Show members option
-                showTreasurerMemberList();
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            if(currentMember.hasLatePayment().success) {
+                membersWithLatePayments = true;
                 break;
-            case 1:
-                // Show members with late payments option
-                showMembersWithLatePayments();
-                break;
-            case 2:
-                // Back to main menu option
-                showMainMenu();
-                break;
+            }
         }
+
+        treasurerMenu.put(new ScreenOption("Show members.", () -> showTreasurerMemberList()), true);
+        treasurerMenu.put(new ScreenOption("Show members with late payments" + (membersWithLatePayments
+                ? "." : " (no member with late payments)."), () -> showTreasurerMembersWithLatePayments()), membersWithLatePayments);
+
+        treasurerMenu.put(new ScreenOption("Log out (back to main menu).",
+                () -> showMainMenu()), true);
+
+        screenManager.showCallbackOptionsView(" - Treasurer menu - ", treasurerMenu);
     }
 
     private static void showTreasurerMemberList() {
@@ -199,7 +202,7 @@ public class Main {
     }
 
     private static void showTreasurerMemberActions(Member member) {
-        LinkedHashMap<String, Boolean> treasurerMemberActions = new LinkedHashMap<String, Boolean>();
+        LinkedHashMap<ScreenOption, Boolean> treasurerMemberActions = new LinkedHashMap<ScreenOption, Boolean>();
 
         List<Discount> discounts = app.getDiscounts();
         boolean discountsAvailable = false;
@@ -214,51 +217,43 @@ public class Main {
             }
         }
 
-        treasurerMemberActions.put("Apply discount"
-                + (discountsAvailable ? "." : " (no available discounts)."), discountsAvailable);
+        treasurerMemberActions.put(new ScreenOption("Apply discount"
+                + (discountsAvailable ? "." : " (no available discounts)."),
+                () -> showTreasurerDiscountList(member)), discountsAvailable);
 
         boolean hasPaidThisYear = member.hasPaidThisYear();
-        treasurerMemberActions.put("Pay fee"
-                + (hasPaidThisYear ? "." : " (already paid this year's fee)."), !hasPaidThisYear);
+        treasurerMemberActions.put(new ScreenOption("Pay fee"
+                + (!hasPaidThisYear ? "." : " (already paid this year's fee)."),
+                () -> showTreasurerPaymentActions(member)), !hasPaidThisYear);
 
-        treasurerMemberActions.put("Members list (back to member list).", true);
+        treasurerMemberActions.put(new ScreenOption("Members list (back to member list).",
+                () -> showTreasurerMemberList()), true);
+        treasurerMemberActions.put(new ScreenOption("Exit (back to main menu).",
+                () -> showTreasurerMenu()), true);
 
+        String viewLabel = " - [Treasurer > Member actions menu] <" + member.firstName
+                + " " + member.lastName + "> - ";
+        screenManager.showCallbackOptionsView(viewLabel, treasurerMemberActions);
+    }
 
-        String viewLabel = " - [Treasurer > Member actions menu] <" + member.firstName + " " + member.lastName + "> - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, treasurerMemberActions);
-        System.out.println("SELECT " + selectedOption);
+    private static void showTreasurerPaymentActions(Member member) {
+        ArrayList<String> paymentActionsMenu = new ArrayList<String>();
+        paymentActionsMenu.add("Accept (pay fee).");
+        paymentActionsMenu.add("Decline (back to member actions menu).");
+
+        double feeValue = member.calculateFee();
+        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> pay fee of: " + feeValue + " - ";
+        int selectedOption = screenManager.showOptionsView(viewLabel, paymentActionsMenu);
         switch (selectedOption) {
-
             case 0:
-                // Show discount option
-                if (discountsAvailable) {
-                    showTreasurerDiscountList(member);
-                } else {
-                    // Show payment option
-                    if (!hasPaidThisYear) {
-                        showPaymentActions(member);
-                    } else {
-                        showTreasurerMemberList();
-                    }
-                }
+                // Accept (pay fee) option
+                member.registerPayment(new Payment(feeValue, "Member fee", ZonedDateTime.now(ZoneOffset.UTC)));
+                screenManager.showInfoView("Payment registered!");
+                showTreasurerMemberActions(member);
                 break;
             case 1:
-                // Show payment option
-
-                if (discountsAvailable) {
-                    if (!hasPaidThisYear) {
-                        showPaymentActions(member);
-                    } else {
-                        showTreasurerMemberActions(member); // loop
-                    }
-                } else {
-                    // Show payment option
-                    showTreasurerMemberList();
-                }
-                break;
-            case 2:
-                // Back to member list option
-                showTreasurerMemberList();
+                // Decline (back to member actions menu) option
+                showTreasurerMemberActions(member);
                 break;
         }
     }
@@ -286,7 +281,30 @@ public class Main {
         showTreasurerMemberActions(member);
     }
 
-    
+    private static void showTreasurerMembersWithLatePayments() {
+        List<Member> members = app.getMembers();
+        ArrayList<String> options = new ArrayList<String>();
+
+        // setOptionsView accepts an ArrayList of strings, so
+        // loop throw all the members and create a string for the option label
+        for(int i = 0; i < members.size(); i++) {
+            Member currentMember = members.get(i);
+            Response hasLatePayment = currentMember.hasLatePayment();
+            System.out.println(hasLatePayment.success);
+            if(hasLatePayment.success) {
+                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " late for: " + hasLatePayment.info);
+
+            } else {
+                members.remove(i);
+                i--;
+            }
+        }
+
+        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
+        showTreasurerMemberActions(members.get(selectedMemberIndex));
+    }
+
+
     /*
      * Coach views
      */
@@ -306,32 +324,16 @@ public class Main {
     }
 
     private static void showCoachMenu() {
-        LinkedHashMap<String, Boolean> coachMenu = new LinkedHashMap<String, Boolean>();
+        LinkedHashMap<ScreenOption, Boolean> coachMenu = new LinkedHashMap<ScreenOption, Boolean>();
 
         boolean hasMembers = !app.getCoachMembers().isEmpty();
-        coachMenu.put("View my members"
-                + (hasMembers ? "." : " (no members assigned to you)."), hasMembers);
+        coachMenu.put(new ScreenOption("View my members"
+                + (hasMembers ? "." : " (no members assigned to you)."), () -> showCoachMemberList()), hasMembers);
 
-        coachMenu.put("View discipline leaderboards.", true);
-        coachMenu.put("Log out (back to main menu).", true);
+        coachMenu.put(new ScreenOption("View discipline leaderboards.", () -> showCoachDisciplineList()), true);
+        coachMenu.put(new ScreenOption("Log out (back to main menu).", () -> showMainMenu()), true);
 
-        int selectedOption = screenManager.showOptionsView(" - Coach menu - ", coachMenu);
-        switch (selectedOption) {
-            case 0:
-                // View my members option
-                showCoachMemberList();
-                break;
-            case 1:
-                // View leaderboards option
-                // TODO display array of leaderboards for different disciplines of members assigned to coach
-                showCoachDisciplineList();
-                break;
-            case 2:
-                // Back to main menu option
-                showMainMenu();
-                break;
-        }
-
+        screenManager.showCallbackOptionsView(" - Coach menu - ", coachMenu);
     }
 
     private static void showCoachMemberList() {
@@ -350,7 +352,7 @@ public class Main {
     }
 
     private static void showCoachMemberActions(Member member) {
-        LinkedHashMap<String, Boolean> coachMemberActions = new LinkedHashMap<String, Boolean>();
+        LinkedHashMap<ScreenOption, Boolean> coachMemberActions = new LinkedHashMap<ScreenOption, Boolean>();
 
         List<Competition> competitions = app.getCompetitions();
         boolean competitionsAvailable = false;
@@ -365,55 +367,26 @@ public class Main {
             }
         }
 
-        coachMemberActions.put("Available competitions"
-                + (competitionsAvailable ? "." : " (no available competitions)."), competitionsAvailable);
+        coachMemberActions.put(new ScreenOption("Available competitions"
+                + (competitionsAvailable ? "." : " (no available competitions)."), () -> {
+            // View available competitions
+            Competition selectedCompetition = showCoachCompetitionList(member);
+            selectedCompetition.registerMember(member);
+            screenManager.showInfoView("Member <" + member.firstName
+                    + " " + member.lastName + "> has been registered to the following competition: "
+                    + selectedCompetition.name);
+            showCoachMemberActions(member);
+        }), competitionsAvailable);
 
-        coachMemberActions.put("Register time.", true);
+        coachMemberActions.put(new ScreenOption("Register time.", () -> showCoachMemberTimeForm(member)), true);
 
-        coachMemberActions.put("Members list (back to member list).", true);
-        coachMemberActions.put("Exit (back to coach menu).", true);
+        coachMemberActions.put(new ScreenOption("Members list (back to member list).", () -> showCoachMemberList()), true);
+        coachMemberActions.put(new ScreenOption("Exit (back to coach menu).", () -> showCoachMenu()), true);
 
 
         String viewLabel = " - [Coach > Member actions menu] <" + member.firstName
                 + " " + member.lastName + "> - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, coachMemberActions);
-        switch (selectedOption) {
-            case 0:
-                if (competitionsAvailable) {
-                    // View available competitions
-                    Competition selectedCompetition = showCoachCompetitionList(member);
-                    selectedCompetition.registerMember(member);
-                    screenManager.showInfoView("Member <" + member.firstName
-                            + " " + member.lastName + "> has been registered to the following competition: "
-                            + selectedCompetition.name);
-                    showCoachMemberActions(member);
-                } else {
-                    // Register time
-                    showCoachMemberTimeForm(member);
-                }
-                break;
-            case 1:
-                if (competitionsAvailable) {
-                    // Register time
-                    showCoachMemberTimeForm(member);
-                } else {
-                    // Back to member list option
-                    showCoachMemberList();
-                }
-                break;
-            case 2:
-                if (competitionsAvailable) {
-                    // Back to member list option
-                    showCoachMemberList();
-                } else {
-                    // Back to coach menu
-                    showCoachMenu();
-                }
-                break;
-            case 3:
-                // Back to coach menu
-                showCoachMenu();
-        }
+        screenManager.showCallbackOptionsView(viewLabel, coachMemberActions);
     }
 
     private static Competition showCoachCompetitionList(Member member) {
@@ -577,52 +550,6 @@ public class Main {
                 // Back to coach menu
                 showCoachMenu();
         }
-    }
-
-
-    // TODO: refactor
-    private static void showPaymentActions(Member member) {
-        ArrayList<String> paymentActionsMenu = new ArrayList<String>();
-        paymentActionsMenu.add("Accept (pay fee).");
-        paymentActionsMenu.add("Decline (back to member actions menu).");
-
-        double feeValue = member.calculateFee();
-        String viewLabel = " - <" + member.firstName + " " + member.lastName + "> pay fee of: " + feeValue + " - ";
-        int selectedOption = screenManager.showOptionsView(viewLabel, paymentActionsMenu);
-        switch (selectedOption) {
-            case 0:
-                // Accept (pay fee) option
-                member.registerPayment(new Payment(feeValue, "Member fee", ZonedDateTime.now(ZoneOffset.UTC)));
-                screenManager.showInfoView("Payment registered!");
-                showTreasurerMemberActions(member);
-                break;
-            case 1:
-                // Decline (back to member actions menu) option
-                showTreasurerMemberActions(member);
-                break;
-        }
-    }
-
-    private static void showMembersWithLatePayments() {
-        List<Member> members = app.getMembers();
-        ArrayList<String> options = new ArrayList<String>();
-
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the members and create a string for the option label
-        for(int i = 0; i < members.size(); i++) {
-            Member currentMember = members.get(i);
-            Response hasLatePayment = currentMember.hasLatePayment();
-            if(hasLatePayment.success) {
-                options.add(currentMember.firstName + " " + currentMember.lastName + " " + currentMember.CPRNumber + " late for: " + hasLatePayment.info);
-
-            } else {
-                members.remove(i);
-                i--;
-            }
-        }
-
-        int selectedMemberIndex = screenManager.showOptionsView(" - Member list - ", options);
-        showTreasurerMemberActions(members.get(selectedMemberIndex));
     }
 
 

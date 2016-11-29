@@ -6,10 +6,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 class ScreenManager {
 
@@ -44,6 +41,25 @@ class ScreenManager {
             }
         }
         return showRangeInputView(1, i) - 1;
+    }
+
+    void showCallbackOptionsView(String label, LinkedHashMap<ScreenOption, Boolean> options) {
+        HashMap<Integer, ScreenOption> shownOptions = new HashMap<Integer, ScreenOption>();
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+        int i = 0;
+        for (Map.Entry<ScreenOption, Boolean> entry : options.entrySet()) {
+            if (entry.getValue()) {
+                i++;
+                shownOptions.put(i, entry.getKey());
+                System.out.println(" [" + (i) + "]   " + entry.getKey().label);
+            } else {
+                System.out.println(" [*]   " + entry.getKey().label);
+            }
+        }
+
+        shownOptions.get(showRangeInputView(1, i)).callback.run();
     }
 
     void showInfoView(String label) {

@@ -1,4 +1,5 @@
 package examproject.core;
+
 import examproject.db.Database;
 import examproject.db.Storable;
 
