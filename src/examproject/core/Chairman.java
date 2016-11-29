@@ -1,23 +1,17 @@
 package examproject.core;
 
-import java.util.Date;
+import java.util.HashMap;
 
-public class Chairman {
+public class Chairman extends AuthAccount {
 
-  private  String username;
-  private  String password;
+    public Chairman (String username, String password) {
+        super(username, password);
+    }
 
-  public Chairman (String username, String password) {
-      this.username = username;
-      this.password = password;
-  }
+    public static Chairman construct(HashMap<String, String> valuesMap) {
+        String username = valuesMap.get("username");
+        String password = valuesMap.get("password");
 
-  public String getUserName() {
-        return username;
-  }
-
-  public boolean addMember(String firstName, String lastName, Date dateOfBirth, String preferredActivity) {
-      return false;
-  }
-
+        return new Chairman(username, password);
+    }
 }

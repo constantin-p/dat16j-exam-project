@@ -1,15 +1,16 @@
 package examproject.core;
 
 public class Response {
-    public boolean status;
+
+    public boolean success;
     public String info = "";
 
-    public Response(boolean status) {
-        this.status = status;
+    public Response(boolean success) {
+        this.success = success;
     }
 
-    public Response(boolean status, String info) {
-        this.status = status;
+    public Response(boolean success, String info) {
+        this.success = success;
         this.info = info;
     }
 }
