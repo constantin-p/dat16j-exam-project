@@ -1,16 +1,12 @@
 package examproject.cmd;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 class ScreenManager {
 
@@ -20,7 +16,7 @@ class ScreenManager {
         this.scanner = new Scanner(System.in);
     }
 
-    int showOptionsView(String label, ArrayList<String> options) {
+    int showOptionsView(String label, List<String> options) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
@@ -31,34 +27,44 @@ class ScreenManager {
         return showRangeInputView(1, options.size()) - 1;
     }
 
-    int showOptionsView(String label, ArrayList<String> disabledOptions, ArrayList<String> options) {
+    int showOptionsView(String label, LinkedHashMap<String, Boolean> options) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
-        for (int i = 0; i < disabledOptions.size(); i++) {
-            System.out.println(" [*]   " + disabledOptions.get(i));
+        int i = 0;
+        for (Map.Entry<String, Boolean> entry : options.entrySet()) {
+            if (entry.getValue()) {
+                i++;
+                System.out.println(" [" + (i) + "]   " + entry.getKey());
+            } else {
+                System.out.println(" [*]   " + entry.getKey());
+            }
+        }
+        return showRangeInputView(1, i) - 1;
+    }
+
+    void showCallbackOptionsView(String label, LinkedHashMap<ScreenOption, Boolean> options) {
+        HashMap<Integer, ScreenOption> shownOptions = new HashMap<Integer, ScreenOption>();
+        System.out.println("*--------------------------------------*");
+        System.out.println("\n" + label + "\n");
+
+        int i = 0;
+        for (Map.Entry<ScreenOption, Boolean> entry : options.entrySet()) {
+            if (entry.getValue()) {
+                i++;
+                shownOptions.put(i, entry.getKey());
+                System.out.println(" [" + (i) + "]   " + entry.getKey().label);
+            } else {
+                System.out.println(" [*]   " + entry.getKey().label);
+            }
         }
 
-        for (int i = 0; i < options.size(); i++) {
-            System.out.println(" [" + (i + 1) + "]   " + options.get(i));
-        }
-
-        return showRangeInputView(1, options.size()) - 1;
+        shownOptions.get(showRangeInputView(1, i)).callback.run();
     }
 
     void showInfoView(String label) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
-    }
-
-    // TODO: use showOptionsView
-    void showInfoView(String label, ArrayList data) {
-        System.out.println("*--------------------------------------*");
-        System.out.println("\n" + label + "\n");
-
-        for (int i = 0; i < data.size(); i++) {
-            System.out.println(" [" + (i + 1) + "]   " + data.get(i));
-        }
     }
 
     int rangeInputViewLoop(int min, int max) {
@@ -81,30 +87,28 @@ class ScreenManager {
     }
 
     int showRangeInputView(int min, int max) {
-        System.out.println("\n Enter your choice [" + min + "-" + max + "]:");
+        System.out.println("\n Enter your choice [" + (min == max
+                ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 
     int showRangeInputView(String label, int min, int max) {
-        System.out.println("\n " + label + " [" + min + "-" + max + "]:");
+        System.out.println("\n " + label + " [" + (min == max
+                ? min : min + "-" + max) + "]:");
         return this.rangeInputViewLoop(min, max);
     }
 
-    String showTimeInputView(String label) {
+    LocalTime showTimeInputView(String label) {
         System.out.println("*--------------------------------------*");
         System.out.println("\n" + label + "\n");
 
-
         // Minutes (0 - 60)
-        int min = this.showRangeInputView("Enter the minutes", 0, 60);
+        int min = this.showRangeInputView("Enter the minutes", 0, 59);
 
         // Seconds (0 - 60)
-        int sec = this.showRangeInputView("Enter the seconds", 0, 60);
+        int sec = this.showRangeInputView("Enter the seconds", 0, 59);
 
-        String timeString = padLeft(Integer.toString(min), 2, '0') + ":"
-                + padLeft(Integer.toString(sec), 2, '0');
-
-        return timeString;
+        return LocalTime.of(0, min, sec);
     }
 
     ZonedDateTime showDateInputView(String label) {
@@ -118,13 +122,13 @@ class ScreenManager {
             // Month (1 - 12)
             int month = this.showRangeInputView("Enter the month", 1, 12);
 
-            // Year (2000 - 2050)
-            int year = this.showRangeInputView("Enter the year", 2000, 2050);
+            // Year (1900 - 2050)
+            int year = this.showRangeInputView("Enter the year", 1900, 2050);
 
             DateTimeFormatter format = DateTimeFormatter.ofPattern("dd MM yyyy");
             String dateString = padLeft(Integer.toString(day), 2, '0') + " "
                     + padLeft(Integer.toString(month), 2, '0') + " "
-                    + padLeft(Integer.toString(year), 2, '0');
+                    + Integer.toString(year);
 
             ZonedDateTime date;
             boolean endLoop = false;
@@ -162,7 +166,9 @@ class ScreenManager {
         }
     }
 
-
+    /*
+     *  Helpers
+     */
     private String padLeft(String s, int n, char c) {
         return String.format("%1$" + n + "s", s).replace(' ', c);
     }
