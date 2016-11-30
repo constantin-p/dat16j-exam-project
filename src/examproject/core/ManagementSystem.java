@@ -228,9 +228,8 @@ public class ManagementSystem {
         for (HashMap<String, String> entry : entries) {
             Member member = Member.construct(entry);
             List<LapTime> lapTimesForMember = member.getLapTimes();
-
             for (LapTime lapTime : lapTimesForMember) {
-                leaderboard.addResult(member, lapTime);
+                leaderboard.addResult(lapTime, member);
             }
         }
 

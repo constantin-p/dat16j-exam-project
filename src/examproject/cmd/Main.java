@@ -332,7 +332,7 @@ public class Main {
         // Loop throw each discipline so we know if we have results registered
         for(int i = 0; i < disciplines.size(); i++) {
             Discipline currentDiscipline = disciplines.get(i);
-            LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
+            LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
             if (!leaderboardResults.isEmpty()) {
                 hasResults = true;
                 break;
@@ -414,9 +414,6 @@ public class Main {
         List<Competition> competitions = app.getCompetitions();
         LinkedHashMap<String, Boolean> options = new LinkedHashMap<String, Boolean>();
 
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the competitions and create a string for the option label
-        // also disable competitions for which the member is already registered to
         for (int i = 0; i < competitions.size(); i++) {
             Competition currentCompetition = competitions.get(i);
             boolean isRegistered = currentCompetition.hasMember(member);
@@ -443,6 +440,35 @@ public class Main {
         return competitions.get(selectedCompetitionIndex);
     }
 
+    private static void showCoachLapTimeCompetitionList(Member member, LocalTime time, ZonedDateTime date) {
+        List<Competition> competitions = app.getCompetitions();
+        LinkedHashMap<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
+
+        for (int i = 0; i < competitions.size(); i++) {
+            Competition currentCompetition = competitions.get(i);
+            boolean isSameDiscipline = member.preferredDiscipline.name.equals(currentCompetition.discipline.name);
+
+            LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
+            row.put("Name", ScreenManager.parseType(currentCompetition.name));
+            row.put("Discipline", ScreenManager.parseType(currentCompetition.discipline.name));
+            row.put("Note", !isSameDiscipline ? "different discipline" : "");
+
+            options.put(new ScreenTableOption(row, () -> {
+                member.registerLapTime(new LapTime(time, date,
+                        Long.toString(System.currentTimeMillis()), currentCompetition.name));
+                screenManager.showInfoView("Lap time registered: " + time
+                        + " on " + ScreenManager.parseDate(date));
+
+                // Back to member actions option
+                showCoachMemberActions(member);
+            }), isSameDiscipline);
+        }
+
+        String viewLabel = " － [Coach] Competition list for: " + member.firstName
+                + " " + member.lastName + " － ";
+        screenManager.showCallbackOptionsTableView(viewLabel, options);
+    }
+
     private static void showCoachMemberTimeForm(Member member) {
         LocalTime time = screenManager.showTimeInputView(" － [Coach > Register member lap time] Time: － ");
         ZonedDateTime date = screenManager.showDateInputView(" － [Coach > Register member lap time] Date: － ");
@@ -466,16 +492,7 @@ public class Main {
 
         resultTypeActionsMenu.put(new ScreenOption("Competition time" + (competitionsAvailable
                 ? "." : " (the user hasn't registered to any competition)."),
-                () -> {
-                    Competition competition = showCoachCompetitionList(member);
-                    member.registerLapTime(new LapTime(time, date,
-                            Long.toString(System.currentTimeMillis()), competition.name));
-                    screenManager.showInfoView("Lap time registered: " + time
-                            + " on " + ScreenManager.parseDate(date));
-
-                    // Back to member actions option
-                    showCoachMemberActions(member);
-                }), competitionsAvailable);
+                () -> showCoachLapTimeCompetitionList(member, time, date)), competitionsAvailable);
 
         resultTypeActionsMenu.put(new ScreenOption("Individual time.",
                 () -> {
@@ -500,7 +517,7 @@ public class Main {
         // Display the discipline list
         for(int i = 0; i < disciplines.size(); i++) {
             Discipline currentDiscipline = disciplines.get(i);
-            LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
+            LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
 
             LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
             row.put("Name", ScreenManager.parseType(currentDiscipline.name));
@@ -516,23 +533,22 @@ public class Main {
 
     private static void showCoachDisciplineLeaderboard(Discipline discipline) {
         LinkedHashMap<ScreenTableOption, Boolean> results = new LinkedHashMap<ScreenTableOption, Boolean>();
-        LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(discipline).getResults();
-
+        LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(discipline).getResults();
         int i = 0;
         //  Display the top 5 results
-        for (Map.Entry<Member, LapTime> entry : leaderboardResults.entrySet()) {
+        for (Map.Entry<LapTime, Member> entry : leaderboardResults.entrySet()) {
             LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
 
-            row.put("First name", entry.getKey().firstName);
-            row.put("Last name", entry.getKey().lastName);
-            row.put("Lap time", entry.getValue().time.toString());
+            row.put("First name", entry.getValue().firstName);
+            row.put("Last name", entry.getValue().lastName);
+            row.put("Lap time", entry.getKey().time.toString());
 
             results.put(new ScreenTableOption(row,
                     () -> {
                         // When an option is selected, show the details and return to the coach menu
-                        screenManager.showInfoView(entry.getKey().firstName
-                                + " " + entry.getKey().lastName + " － time: "
-                                + entry.getValue().time + " on: " + ScreenManager.parseDate(entry.getValue().date));
+                        screenManager.showInfoView(entry.getValue().firstName
+                                + " " + entry.getValue().lastName + " － time: "
+                                + entry.getKey().time + " on: " + ScreenManager.parseDate(entry.getKey().date));
                         showCoachMenu();
                     }), true);
             i++;
