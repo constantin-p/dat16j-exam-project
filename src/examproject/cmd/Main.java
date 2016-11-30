@@ -332,7 +332,7 @@ public class Main {
         // Loop throw each discipline so we know if we have results registered
         for(int i = 0; i < disciplines.size(); i++) {
             Discipline currentDiscipline = disciplines.get(i);
-            LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
+            LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
             if (!leaderboardResults.isEmpty()) {
                 hasResults = true;
                 break;
@@ -517,7 +517,7 @@ public class Main {
         // Display the discipline list
         for(int i = 0; i < disciplines.size(); i++) {
             Discipline currentDiscipline = disciplines.get(i);
-            LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
+            LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(currentDiscipline).getResults();
 
             LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
             row.put("Name", ScreenManager.parseType(currentDiscipline.name));
@@ -533,23 +533,22 @@ public class Main {
 
     private static void showCoachDisciplineLeaderboard(Discipline discipline) {
         LinkedHashMap<ScreenTableOption, Boolean> results = new LinkedHashMap<ScreenTableOption, Boolean>();
-        LinkedHashMap<Member, LapTime> leaderboardResults = app.getLeaderboard(discipline).getResults();
-
+        LinkedHashMap<LapTime, Member> leaderboardResults = app.getLeaderboard(discipline).getResults();
         int i = 0;
         //  Display the top 5 results
-        for (Map.Entry<Member, LapTime> entry : leaderboardResults.entrySet()) {
+        for (Map.Entry<LapTime, Member> entry : leaderboardResults.entrySet()) {
             LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
 
-            row.put("First name", entry.getKey().firstName);
-            row.put("Last name", entry.getKey().lastName);
-            row.put("Lap time", entry.getValue().time.toString());
+            row.put("First name", entry.getValue().firstName);
+            row.put("Last name", entry.getValue().lastName);
+            row.put("Lap time", entry.getKey().time.toString());
 
             results.put(new ScreenTableOption(row,
                     () -> {
                         // When an option is selected, show the details and return to the coach menu
-                        screenManager.showInfoView(entry.getKey().firstName
-                                + " " + entry.getKey().lastName + " － time: "
-                                + entry.getValue().time + " on: " + ScreenManager.parseDate(entry.getValue().date));
+                        screenManager.showInfoView(entry.getValue().firstName
+                                + " " + entry.getValue().lastName + " － time: "
+                                + entry.getKey().time + " on: " + ScreenManager.parseDate(entry.getKey().date));
                         showCoachMenu();
                     }), true);
             i++;
