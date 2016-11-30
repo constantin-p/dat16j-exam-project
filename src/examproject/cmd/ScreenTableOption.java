@@ -37,6 +37,9 @@ public class ScreenTableOption {
     }
 
 
+    /*
+     *  Helpers
+     */
     public static String getHeaderStringFromRow(LinkedHashMap<String, String> sourceRow, int cellWidth) {
         String rowLabel = "";
         String cellLabel = "";
