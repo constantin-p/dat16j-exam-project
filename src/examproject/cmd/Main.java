@@ -414,9 +414,6 @@ public class Main {
         List<Competition> competitions = app.getCompetitions();
         LinkedHashMap<String, Boolean> options = new LinkedHashMap<String, Boolean>();
 
-        // setOptionsView accepts an ArrayList of strings, so
-        // loop throw all the competitions and create a string for the option label
-        // also disable competitions for which the member is already registered to
         for (int i = 0; i < competitions.size(); i++) {
             Competition currentCompetition = competitions.get(i);
             boolean isRegistered = currentCompetition.hasMember(member);
@@ -443,6 +440,35 @@ public class Main {
         return competitions.get(selectedCompetitionIndex);
     }
 
+    private static void showCoachLapTimeCompetitionList(Member member, LocalTime time, ZonedDateTime date) {
+        List<Competition> competitions = app.getCompetitions();
+        LinkedHashMap<ScreenTableOption, Boolean> options = new LinkedHashMap<ScreenTableOption, Boolean>();
+
+        for (int i = 0; i < competitions.size(); i++) {
+            Competition currentCompetition = competitions.get(i);
+            boolean isSameDiscipline = member.preferredDiscipline.name.equals(currentCompetition.discipline.name);
+
+            LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
+            row.put("Name", ScreenManager.parseType(currentCompetition.name));
+            row.put("Discipline", ScreenManager.parseType(currentCompetition.discipline.name));
+            row.put("Note", !isSameDiscipline ? "different discipline" : "");
+
+            options.put(new ScreenTableOption(row, () -> {
+                member.registerLapTime(new LapTime(time, date,
+                        Long.toString(System.currentTimeMillis()), currentCompetition.name));
+                screenManager.showInfoView("Lap time registered: " + time
+                        + " on " + ScreenManager.parseDate(date));
+
+                // Back to member actions option
+                showCoachMemberActions(member);
+            }), isSameDiscipline);
+        }
+
+        String viewLabel = " － [Coach] Competition list for: " + member.firstName
+                + " " + member.lastName + " － ";
+        screenManager.showCallbackOptionsTableView(viewLabel, options);
+    }
+
     private static void showCoachMemberTimeForm(Member member) {
         LocalTime time = screenManager.showTimeInputView(" － [Coach > Register member lap time] Time: － ");
         ZonedDateTime date = screenManager.showDateInputView(" － [Coach > Register member lap time] Date: － ");
@@ -466,16 +492,7 @@ public class Main {
 
         resultTypeActionsMenu.put(new ScreenOption("Competition time" + (competitionsAvailable
                 ? "." : " (the user hasn't registered to any competition)."),
-                () -> {
-                    Competition competition = showCoachCompetitionList(member);
-                    member.registerLapTime(new LapTime(time, date,
-                            Long.toString(System.currentTimeMillis()), competition.name));
-                    screenManager.showInfoView("Lap time registered: " + time
-                            + " on " + ScreenManager.parseDate(date));
-
-                    // Back to member actions option
-                    showCoachMemberActions(member);
-                }), competitionsAvailable);
+                () -> showCoachLapTimeCompetitionList(member, time, date)), competitionsAvailable);
 
         resultTypeActionsMenu.put(new ScreenOption("Individual time.",
                 () -> {
