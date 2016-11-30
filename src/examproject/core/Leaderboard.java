@@ -2,6 +2,7 @@ package examproject.core;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Leaderboard {
 
@@ -17,12 +18,12 @@ public class Leaderboard {
     }
 
     public LinkedHashMap<LapTime, Member> getResults() {
-        List<LapTime> mapKeys = new ArrayList<LapTime>(this.results.keySet());
-        List<Member> mapValues = new ArrayList<Member>(this.results.values());
+        LinkedHashMap<LapTime, Member> sortedResults = new LinkedHashMap<LapTime, Member>();
 
         this.results.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey((k1, k2) -> k1.time.compareTo(k2.time)));
-
+            .sorted(Map.Entry.comparingByKey((k1, k2) -> k1.time.compareTo(k2.time)))
+            .forEach((entry) -> sortedResults.put(entry.getKey(), entry.getValue()));
+        this.results = sortedResults;
         return this.results;
     }
 }
