@@ -380,7 +380,7 @@ public class Main {
             Competition currentCompetition = competitions.get(i);
             // If there are competitions in which the member can but is not yet registered
             // we show the competitions menu
-            if(member.preferredDiscipline.equals(currentCompetition.discipline.name)
+            if(member.preferredDiscipline.name.equals(currentCompetition.discipline.name)
                 && !currentCompetition.hasMember(member)) {
                 competitionsAvailable = true;
                 break;
