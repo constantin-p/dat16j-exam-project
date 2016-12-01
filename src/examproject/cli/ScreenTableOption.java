@@ -1,4 +1,4 @@
-package examproject.cmd;
+package examproject.cli;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

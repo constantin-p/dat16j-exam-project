@@ -1,4 +1,4 @@
-package examproject.cmd;
+package examproject.cli;
 
 public class ScreenOption {
 

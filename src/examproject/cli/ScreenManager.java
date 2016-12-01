@@ -1,4 +1,4 @@
-package examproject.cmd;
+package examproject.cli;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
